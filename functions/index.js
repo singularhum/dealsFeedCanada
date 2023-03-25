@@ -426,7 +426,7 @@ async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
 }
 
 /**
- * Sends the deal to Discord with a webhook based on the source.
+ * Sends the deal to Discord to a specific channel based on the source and state.
  * @param {Object} deal The deal to send.
  * @param {Object} isNew Whether the deal is new or not.
  * @param {Object} sendToHot Whether to send to the Hot channels or not.
@@ -467,7 +467,7 @@ async function sendToDiscord(deal, isNew, sendToHot) {
 }
 
 /**
- * Sends the deal to Discord with the supplied channel.
+ * Sends the deal to Discord with the supplied channel using the API.
  * @param {Object} deal The deal to send.
  * @param {string} channelId The id of the channel to use.
  * @param {string} isNew Whether to send as new or update existing message.
