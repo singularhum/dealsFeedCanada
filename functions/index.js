@@ -270,7 +270,6 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
                     if (!dbDeal.is_hot && deal.is_hot) {
                         // Existing deal has turned hot.
                         newlyHotDeals.push(dbDeal);
-                        functions.logger.log('Previous deal is now hot: ' + dbDeal.id);
                     }
 
                     // Update fields that can change and save to db.
@@ -287,11 +286,6 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
 
                     await db.collection(DB_DEALS_COLLECTION).doc(dbDeal.id).set(dbDeal);
                     updatedDeals.push(dbDeal);
-                } else if (!dbDeal.is_hot && deal.is_hot) {
-                    // If there isn't anything to update but has turned hot, still update.
-                    functions.logger.log('Previous deal is now hot: ' + dbDeal.id);
-                    await db.collection(DB_DEALS_COLLECTION).doc(dbDeal.id).set(dbDeal);
-                    newlyHotDeals.push(dbDeal);
                 }
             } else {
                 // Sometimes deals will come back in the list when deals are removed/deleted
@@ -323,9 +317,11 @@ function shouldUpdateDeal(dbDeal, deal) {
     let shouldUpdate = false;
 
     if (deal.title !== dbDeal.title || deal.tag != dbDeal.tag) {
-        // Always update when title and/or tag changes.
         shouldUpdate = true;
         functions.logger.log('Previous deal update to title/tag: ' + dbDeal.id);
+    } else if (!dbDeal.is_hot && deal.is_hot) {
+        shouldUpdate = true;
+        functions.logger.log('Previous deal is now hot: ' + dbDeal.id);
     } else {
         if (deal.score !== dbDeal.score) {
             const difference = Math.abs(dbDeal.score - deal.score);
