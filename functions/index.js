@@ -309,8 +309,8 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
 
 /**
  * Reduce the update calls to the DB and update notifications by checking certain conditions.
- * @param {Array} dbDeal The deal from the DB.
- * @param {Array} deal The current deal parsed.
+ * @param {Object} dbDeal The deal from the DB.
+ * @param {Object} deal The current deal parsed.
  * @return {boolean} Whether the deal should be updated or not.
  */
 function shouldUpdateDeal(dbDeal, deal) {
@@ -343,8 +343,8 @@ function shouldUpdateDeal(dbDeal, deal) {
 
 /**
  * Check whether to update the score/comment if it changed a large enough amount.
- * @param {Array} difference The difference of the score/comment.
- * @param {Array} num The score or number of comments.
+ * @param {int} difference The difference of the score/comment.
+ * @param {int} num The score or number of comments.
  * @return {boolean} Whether the deal should be updated or not.
  */
 function shouldUpdateScoreComment(difference, num) {
@@ -371,9 +371,9 @@ function shouldUpdateScoreComment(difference, num) {
 
 /**
  * Sends notifications for new, hot and updated deals. Currently is only for Discord.
- * @param {Object} newDeals An array with all the new deals.
- * @param {Object} newlyHotDeals An array with all the newly hot deals.
- * @param {Object} updatedDeals An array with all the updated deals.
+ * @param {Array} newDeals An array with all the new deals.
+ * @param {Array} newlyHotDeals An array with all the newly hot deals.
+ * @param {Array} updatedDeals An array with all the updated deals.
  */
 async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
     if (newDeals.length > 0 || newlyHotDeals.length > 0 || updatedDeals.length > 0) {
@@ -443,8 +443,8 @@ async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
 /**
  * Sends the deal to Discord to a specific channel based on the source and state.
  * @param {Object} deal The deal to send.
- * @param {Object} isNew Whether the deal is new or not.
- * @param {Object} sendToHot Whether to send to the Hot channels or not.
+ * @param {boolean} isNew Whether the deal is new or not.
+ * @param {boolean} sendToHot Whether to send to the Hot channels or not.
  */
 async function sendToDiscord(deal, isNew, sendToHot) {
     try {
@@ -485,8 +485,8 @@ async function sendToDiscord(deal, isNew, sendToHot) {
  * Sends the deal to Discord with the supplied channel using the API.
  * @param {Object} deal The deal to send.
  * @param {string} channelId The id of the channel to use.
- * @param {string} isNew Whether to send as new or update existing message.
- * @param {Object} sendToHot Whether to send to the Hot channels or not.
+ * @param {boolean} isNew Whether to send as new or update existing message.
+ * @param {boolean} sendToHot Whether to send to the Hot channels or not.
  */
 async function sendDiscordApi(deal, channelId, isNew, sendToHot) {
     functions.logger.log('Discord - Sending ' + deal.id + ' to ' + channelId);
@@ -555,10 +555,10 @@ async function sendDiscordApi(deal, channelId, isNew, sendToHot) {
 
 /**
  * Sends an update to Discord to edit a previous message.
- * @param {Object} dealId The id of the deal.
- * @param {string} channel The channel to use.
+ * @param {string} dealId The id of the deal.
+ * @param {Channel} channel The channel to use.
  * @param {string} messageId The id of the message.
- * @param {string} embed The embed to edit the message with.
+ * @param {Object} embed The embed to edit the message with.
  */
 async function sendDiscordUpdate(dealId, channel, messageId, embed) {
     let message = await channel.messages.fetch(messageId);
