@@ -163,10 +163,10 @@ async function parseSubreddit(subredditName) {
                 const deal = {};
 
                 // Get the tag/flair that can come from different properties.
-                if (dealJson.data.link_flair_richtext && dealJson.data.link_flair_richtext.length >= 1) {
-                    deal.tag = dealJson.data.link_flair_richtext[0].t;
-                } else if (dealJson.data.link_flair_css_class) {
+                if (dealJson.data.link_flair_css_class) {
                     deal.tag = dealJson.data.link_flair_css_class;
+                } else if (dealJson.data.link_flair_richtext && dealJson.data.link_flair_richtext.length >= 1) {
+                    deal.tag = dealJson.data.link_flair_richtext[0].t;
                 } else {
                     deal.tag = null;
                 }
