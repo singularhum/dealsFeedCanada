@@ -432,8 +432,8 @@ async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
 
             // Send out the updated notifications. Use Promise.all and let Discord.js handle rate limits with the updates.
             const promises = [];
-            for (let i = updatedDeals.length - 1; i >= 0; i--) {
-                promises.push(sendToDiscord(updatedDeals[i], false, false));
+            for (const updatedDeal of updatedDeals) {
+                promises.push(sendToDiscord(updatedDeal, false, false));
             }
             await Promise.all(promises);
         }
