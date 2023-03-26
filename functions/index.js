@@ -162,22 +162,25 @@ async function parseSubreddit(subredditName) {
             dealsJson.data.children.forEach((dealJson) => {
                 const deal = {};
 
+                // Get the tag/flair that can come from different properties.
                 if (dealJson.data.link_flair_richtext && dealJson.data.link_flair_richtext.length >= 1) {
                     deal.tag = dealJson.data.link_flair_richtext[0].t;
+                } else if (dealJson.data.link_flair_css_class) {
+                    deal.tag = dealJson.data.link_flair_css_class;
                 } else {
                     deal.tag = null;
                 }
 
-                let linkFlairCssClass = '';
-                if (dealJson.data.link_flair_css_class) {
-                    linkFlairCssClass = dealJson.data.link_flair_css_class;
+                // The CSS flair can be lower case so replace it with our constant.
+                if (deal.tag === 'expired') {
+                    deal.tag = EXPIRED_STATE;
                 }
 
                 // reddit returns the date in unix epoch in seconds so multiple by 1000 for milliseconds.
                 deal.created = new Date(dealJson.data.created_utc * 1000);
 
                 // Exclude certain posts.
-                if (deal.tag !== 'Question' && linkFlairCssClass !== 'WeeklyDiscussion' && linkFlairCssClass !== 'Review') {
+                if (deal.tag !== 'Question' && deal.tag !== 'WeeklyDiscussion' && deal.tag !== 'Review') {
                     deal.id = dealJson.data.id;
                     deal.source = subredditName;
                     deal.title = dealJson.data.title;
