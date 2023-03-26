@@ -222,7 +222,8 @@ async function cleanDB(deals, notificationUpdatedDeals) {
             const foundDeal = deals.find((deal) => deal.id === dbDeal.id);
 
             // This dbDeal is not in the current deals list so remove/update it.
-            if (!foundDeal) {
+            // Also makes there is a least one with the same source (can be empty if parsing failed).
+            if (!foundDeal && deals.find((deal) => deal.source === dbDeal.source)) {
                 if (dbDeal.created < twoDaysAgo) {
                     // This deal is older than two days so delete it.
                     await db.collection(DB_DEALS_COLLECTION).doc(dbDeal.id).delete();
@@ -310,7 +311,7 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
 }
 
 /**
- * Reduce the update calls to the DB by checking certain conditions.
+ * Reduce the update calls to the DB and update notifications by checking certain conditions.
  * @param {Array} dbDeal The deal from the DB.
  * @param {Array} deal The current deal parsed.
  * @return {boolean} Whether the deal should be updated or not.
@@ -322,33 +323,48 @@ function shouldUpdateDeal(dbDeal, deal) {
         // Always update when title and/or tag changes.
         shouldUpdate = true;
         functions.logger.log('Previous deal update to title/tag: ' + dbDeal.id);
-    } else if (deal.source === REDFLAGDEALS && (deal.score !== dbDeal.score || deal.num_comments !== dbDeal.num_comments)) {
-        // For now always update when score or comments change.
-        shouldUpdate = true;
-        functions.logger.log('Previous deal update to score/comments: ' + dbDeal.id);
-    } else if ((deal.source === BAPCSALESCANADA || deal.source === GAMEDEALS || deal.source === VIDEOGAMEDEALSCANADA)) {
-        if (deal.num_comments !== dbDeal.num_comments) {
-            shouldUpdate = true;
-        } else if (deal.score !== dbDeal.score) {
-            // Reddit has "dynamic" scores which may change everytime by small amounts so try to limit the number of updates.
-            if (deal.score > dbDeal.score) {
-                // When the score is going up, only update if it changes by more than certain amounts.
-                if (deal.score >= 30) {
-                    shouldUpdate = Math.abs(dbDeal.score - deal.score) >= 4;
-                } else if (deal.score >= 100) {
-                    shouldUpdate = Math.abs(dbDeal.score - deal.score) >= 15;
-                } else {
-                    shouldUpdate = true;
-                }
-            } else {
-                // When the score is going down, only update when changing a lot (usually does not go down a lot with higher rated posts) or is low.
-                shouldUpdate = deal.score = 0 || Math.abs(dbDeal.score - deal.score) >= 10;
-            }
+    } else {
+        if (deal.score !== dbDeal.score) {
+            const difference = Math.abs(dbDeal.score - deal.score);
+            shouldUpdate = shouldUpdateScoreComment(difference, deal.score);
+        }
+
+        if (!shouldUpdate && deal.num_comments !== dbDeal.num_comments) {
+            const difference = Math.abs(dbDeal.num_comments - deal.num_comments);
+            shouldUpdate = shouldUpdateScoreComment(difference, deal.num_comments);
         }
 
         if (shouldUpdate) {
             functions.logger.log('Previous deal update to score/comments: ' + dbDeal.id);
         }
+    }
+
+    return shouldUpdate;
+}
+
+/**
+ * Check whether to update the score/comment if it changed a large enough amount.
+ * @param {Array} difference The difference of the score/comment.
+ * @param {Array} num The score or number of comments.
+ * @return {boolean} Whether the deal should be updated or not.
+ */
+function shouldUpdateScoreComment(difference, num) {
+    let shouldUpdate;
+
+    if (num >= 500 || num <= -500) {
+        shouldUpdate = difference >= 100;
+    } else if (num >= 200 || num <= -200) {
+        shouldUpdate = difference >= 50;
+    } else if (num >= 100 || num <= -100) {
+        shouldUpdate = difference >= 20;
+    } else if (num >= 20 || num <= -20) {
+        shouldUpdate = difference >= 10;
+    } else if (num >= 10 || num <= -10) {
+        shouldUpdate = difference >= 5;
+    } else if (num > 2 || num < -2) {
+        shouldUpdate = difference >= 3;
+    } else {
+        shouldUpdate = true;
     }
 
     return shouldUpdate;
