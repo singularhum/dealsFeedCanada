@@ -1,6 +1,6 @@
 {
   "projects": {
-    "default": "dealsfeedcanada-dev",
-    "production": "dealsfeedcanada"
+    "dev": "dealsfeedcanada-dev",
+    "prod": "dealsfeedcanada"
   }
 }
