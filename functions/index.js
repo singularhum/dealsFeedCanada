@@ -448,34 +448,26 @@ async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
  */
 async function sendToDiscord(deal, isNew, sendToHot) {
     try {
-        let channelId;
-        if (sendToHot) {
-            if (deal.source === BAPCSALESCANADA) {
-                channelId = `${process.env.DISCORD_CHANNEL_HOT_BAPCSALESCANADA}`;
-            } else if (deal.source === GAMEDEALS) {
-                channelId = `${process.env.DISCORD_CHANNEL_HOT_GAMEDEALS}`;
-            } else if (deal.source === REDFLAGDEALS) {
-                channelId = `${process.env.DISCORD_CHANNEL_HOT_REDFLAGDEALS}`;
-            } else if (deal.source === VIDEOGAMEDEALSCANADA) {
-                channelId = `${process.env.DISCORD_CHANNEL_HOT_VIDEOGAMEDEALSCANADA}`;
-            } else {
-                throw new Error('Source of "' + deal.source + '" is unhandled');
-            }
+        let allChannelId;
+        let hotChannelId;
+
+        if (deal.source === BAPCSALESCANADA) {
+            allChannelId = `${process.env.DISCORD_CHANNEL_BAPCSALESCANADA}`;
+            hotChannelId = `${process.env.DISCORD_CHANNEL_HOT_BAPCSALESCANADA}`;
+        } else if (deal.source === GAMEDEALS) {
+            allChannelId = `${process.env.DISCORD_CHANNEL_GAMEDEALS}`;
+            hotChannelId = `${process.env.DISCORD_CHANNEL_HOT_GAMEDEALS}`;
+        } else if (deal.source === REDFLAGDEALS) {
+            allChannelId = `${process.env.DISCORD_CHANNEL_REDFLAGDEALS}`;
+            hotChannelId = `${process.env.DISCORD_CHANNEL_HOT_REDFLAGDEALS}`;
+        } else if (deal.source === VIDEOGAMEDEALSCANADA) {
+            allChannelId = `${process.env.DISCORD_CHANNEL_VIDEOGAMEDEALSCANADA}`;
+            hotChannelId = `${process.env.DISCORD_CHANNEL_HOT_VIDEOGAMEDEALSCANADA}`;
         } else {
-            if (deal.source === BAPCSALESCANADA) {
-                channelId = `${process.env.DISCORD_CHANNEL_BAPCSALESCANADA}`;
-            } else if (deal.source === GAMEDEALS) {
-                channelId = `${process.env.DISCORD_CHANNEL_GAMEDEALS}`;
-            } else if (deal.source === REDFLAGDEALS) {
-                channelId = `${process.env.DISCORD_CHANNEL_REDFLAGDEALS}`;
-            } else if (deal.source === VIDEOGAMEDEALSCANADA) {
-                channelId = `${process.env.DISCORD_CHANNEL_VIDEOGAMEDEALSCANADA}`;
-            } else {
-                throw new Error('Source of "' + deal.source + '" is unhandled');
-            }
+            throw new Error('Source of "' + deal.source + '" is unhandled');
         }
 
-        await sendDiscordApi(deal, channelId, isNew, sendToHot);
+        await sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot);
     } catch (error) {
         functions.logger.error('Discord - Error sending ' + deal.id, error);
     }
@@ -484,13 +476,12 @@ async function sendToDiscord(deal, isNew, sendToHot) {
 /**
  * Sends the deal to Discord with the supplied channel using the API.
  * @param {Object} deal The deal to send.
- * @param {string} channelId The id of the channel to use.
+ * @param {string} allChannelId The id of the All channel to use.
+ * @param {string} hotChannelId The id of the Hot channel to use.
  * @param {boolean} isNew Whether to send as new or update existing message.
  * @param {boolean} sendToHot Whether to send to the Hot channels or not.
  */
-async function sendDiscordApi(deal, channelId, isNew, sendToHot) {
-    functions.logger.log('Discord - Sending ' + deal.id + ' to ' + channelId);
-
+async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot) {
     try {
         const link = buildLink(deal);
 
@@ -528,28 +519,36 @@ async function sendDiscordApi(deal, channelId, isNew, sendToHot) {
             .setFooter({ text: util.format('%s score | %s%s', score, numComments, tag) })
             .setColor(2303786);
 
-        const channel = discordClient.channels.cache.get(channelId);
+        const allChannel = discordClient.channels.cache.get(allChannelId);
+        const hotChannel = discordClient.channels.cache.get(hotChannelId);
 
         if (isNew) {
-            const message = await channel.send({ embeds: [embed] });
+            functions.logger.log('Discord - Sending ' + deal.id + ' to ' + allChannelId);
+
+            const message = await allChannel.send({ embeds: [embed] });
             deal.discord_message_id = message.id;
-            functions.logger.log('Discord - ' + deal.id + ' has been sent to ' + channelId);
             await db.collection(DB_DEALS_COLLECTION).doc(deal.id).set({ discord_message_id: deal.discord_message_id }, { merge: true });
+
+            functions.logger.log('Discord - ' + deal.id + ' has been sent to ' + allChannelId);
         } else if (sendToHot) {
-            const message = await channel.send({ embeds: [embed] });
+            functions.logger.log('Discord - Sending ' + deal.id + ' to ' + hotChannelId);
+
+            const message = await hotChannel.send({ embeds: [embed] });
             deal.discord_hot_message_id = message.id;
-            functions.logger.log('Discord - ' + deal.id + ' has been sent to ' + channelId);
             await db.collection(DB_DEALS_COLLECTION).doc(deal.id).set({ discord_hot_message_id: deal.discord_message_id }, { merge: true });
+
+            functions.logger.log('Discord - ' + deal.id + ' has been sent to ' + hotChannelId);
         } else if (deal.discord_message_id) {
-            await sendDiscordUpdate(deal.id, channel, deal.discord_message_id, embed);
+            functions.logger.log('Discord - Sending ' + deal.id + ' to ' + allChannelId);
+            await sendDiscordUpdate(deal.id, allChannel, deal.discord_message_id, embed);
 
             // Also update the message in the hot channel if it exists.
             if (deal.discord_hot_message_id) {
-                await sendDiscordUpdate(deal.id, channel, deal.discord_hot_message_id, embed);
+                await sendDiscordUpdate(deal.id, hotChannel, deal.discord_hot_message_id, embed);
             }
         }
     } catch (error) {
-        functions.logger.error('Discord - Error sending/updating ' + deal.id + ' to ' + channelId, error);
+        functions.logger.error('Discord - Error sending/updating ' + deal.id + ' to ' + allChannelId + ' or ' + hotChannelId, error);
     }
 }
 
