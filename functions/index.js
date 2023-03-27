@@ -313,24 +313,23 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
                     newlyHotDeals.push(dbDeal);
                     functions.logger.log('Previous deal is now hot: ' + dbDeal.id);
                 } else {
-                    // Limit the amount of updates by source.
-                    if (dbDeal.source === BAPCSALESCANADA) {
-                        bapcUpdateCount += 1;
-                        shouldUpdate = bapcUpdateCount <= 3;
-                    } else if (dbDeal.source === GAMEDEALS) {
-                        gameDealsUpdateCount += 1;
-                        shouldUpdate = gameDealsUpdateCount <= 3;
-                    } else if (dbDeal.source === REDFLAGDEALS) {
-                        rfdUpdateCount += 1;
-                        shouldUpdate = rfdUpdateCount <= 5;
-                    } else if (dbDeal.source === VIDEOGAMEDEALSCANADA) {
-                        videoGamesUpdateCount += 1;
-                        shouldUpdate = videoGamesUpdateCount <= 3;
-                    }
+                    shouldUpdate = shouldUpdateDeal(dbDeal, deal);
 
+                    // Limit the amount of updates by source.
                     if (shouldUpdate) {
-                        // Limits have not been reached so check if there are any updates to make.
-                        shouldUpdate = shouldUpdateDeal(dbDeal, deal);
+                        if (dbDeal.source === BAPCSALESCANADA) {
+                            bapcUpdateCount += 1;
+                            shouldUpdate = bapcUpdateCount <= 3;
+                        } else if (dbDeal.source === GAMEDEALS) {
+                            gameDealsUpdateCount += 1;
+                            shouldUpdate = gameDealsUpdateCount <= 3;
+                        } else if (dbDeal.source === REDFLAGDEALS) {
+                            rfdUpdateCount += 1;
+                            shouldUpdate = rfdUpdateCount <= 5;
+                        } else if (dbDeal.source === VIDEOGAMEDEALSCANADA) {
+                            videoGamesUpdateCount += 1;
+                            shouldUpdate = videoGamesUpdateCount <= 3;
+                        }
                     }
                 }
 
