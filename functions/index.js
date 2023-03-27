@@ -487,7 +487,7 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
 
         // Embed title has a limit of 256 so trim it if it exceeds.
         let title = trimString(deal.title, 250);
-        if (deal.is_hot) title = '🔥 ' + deal.title;
+        if (deal.is_hot) title = '🔥 ' + title;
         if (deal.tag === EXPIRED_STATE || deal.tag === SOLD_OUT_STATE) {
             // Strike out the title text
             title = '~~' + title + '~~';
