@@ -270,13 +270,13 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
                     if (!dbDeal.is_hot && deal.is_hot) {
                         // Existing deal has turned hot.
                         newlyHotDeals.push(dbDeal);
+                        dbDeal.is_hot = deal.is_hot;
                     }
 
                     // Update fields that can change and save to db.
                     dbDeal.title = deal.title;
                     dbDeal.tag = deal.tag;
                     dbDeal.num_comments = deal.num_comments;
-                    dbDeal.is_hot = deal.is_hot;
                     dbDeal.date = Timestamp.fromDate(new Date());
 
                     // When RFD deal is expired/moved, the score is returned as 0 so ignore that.
