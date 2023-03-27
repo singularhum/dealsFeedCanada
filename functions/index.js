@@ -131,6 +131,31 @@ async function parseRedFlagDeals() {
         } else {
             functions.logger.error('Parsing RedFlagDeals failed', response);
         }
+
+        // Unfortunately there can be duplicate IDs when merging of posts occur.
+        // The API does not identify this so we must handle it ourselves.
+        // Basically for duplicate IDs, remove any that have an expired status (2).
+        const occurrences = {};
+        const duplicateIds = [];
+        for (const deal of deals) {
+            if (occurrences[deal.id] && !duplicateIds.find((duplicateId) => duplicateId === deal.id)) {
+                // An occurence was previously found so it is a duplicate. Add as duplicate if not already.
+                duplicateIds.push(deal.id);
+            } else {
+                occurrences[deal.id] = true;
+            }
+        }
+
+        // Now remove the duplicate expired ones.
+        for (const duplicateId of duplicateIds) {
+            for (let i = deals.length - 1; i >= 0; i--) {
+                const deal = deals[i];
+                if (deal.id === duplicateId && deal.tag === EXPIRED_STATE) {
+                    functions.logger.info('Removing duplicate deal ' + deal.id);
+                    deals.splice(i, 1);
+                }
+            }
+        }
     } catch (e) {
         functions.logger.error('Parsing RedFlagDeals failed', e);
     }
@@ -268,20 +293,48 @@ async function cleanDB(deals, notificationUpdatedDeals) {
  * @param {Array} updatedDeals An array to add updated deals.
  */
 async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
+    let bapcUpdateCount = 0;
+    let gameDealsUpdateCount = 0;
+    let rfdUpdateCount = 0;
+    let videoGamesUpdateCount = 0;
+
     for (const deal of deals) {
         try {
             const dbDeal = dbDeals.find((dbDeal) => dbDeal.id === deal.id);
 
             if (dbDeal) {
                 // Deal was found so check if we should update it.
-                const shouldUpdate = shouldUpdateDeal(dbDeal, deal);
-                if (shouldUpdate) {
-                    if (!dbDeal.is_hot && deal.is_hot) {
-                        // Existing deal has turned hot.
-                        newlyHotDeals.push(dbDeal);
-                        dbDeal.is_hot = deal.is_hot;
+                let shouldUpdate;
+
+                if (!dbDeal.is_hot && deal.is_hot) {
+                    // Existing deal has turned hot so always update.
+                    shouldUpdate = true;
+                    dbDeal.is_hot = deal.is_hot;
+                    newlyHotDeals.push(dbDeal);
+                    functions.logger.log('Previous deal is now hot: ' + dbDeal.id);
+                } else {
+                    // Limit the amount of updates by source.
+                    if (dbDeal.source === BAPCSALESCANADA) {
+                        bapcUpdateCount += 1;
+                        shouldUpdate = bapcUpdateCount <= 3;
+                    } else if (dbDeal.source === GAMEDEALS) {
+                        gameDealsUpdateCount += 1;
+                        shouldUpdate = gameDealsUpdateCount <= 3;
+                    } else if (dbDeal.source === REDFLAGDEALS) {
+                        rfdUpdateCount += 1;
+                        shouldUpdate = rfdUpdateCount <= 5;
+                    } else if (dbDeal.source === VIDEOGAMEDEALSCANADA) {
+                        videoGamesUpdateCount += 1;
+                        shouldUpdate = videoGamesUpdateCount <= 3;
                     }
 
+                    if (shouldUpdate) {
+                        // Limits have not been reached so check if there are any updates to make.
+                        shouldUpdate = shouldUpdateDeal(dbDeal, deal);
+                    }
+                }
+
+                if (shouldUpdate) {
                     // Update fields that can change and save to db.
                     dbDeal.title = deal.title;
                     dbDeal.tag = deal.tag;
@@ -328,9 +381,6 @@ function shouldUpdateDeal(dbDeal, deal) {
     if (deal.title !== dbDeal.title || deal.tag != dbDeal.tag) {
         shouldUpdate = true;
         functions.logger.log('Previous deal update to title/tag: ' + dbDeal.id);
-    } else if (!dbDeal.is_hot && deal.is_hot) {
-        shouldUpdate = true;
-        functions.logger.log('Previous deal is now hot: ' + dbDeal.id);
     } else {
         if (deal.score !== dbDeal.score) {
             const difference = Math.abs(dbDeal.score - deal.score);
@@ -372,7 +422,7 @@ function shouldUpdateScoreComment(difference, num) {
     } else if (num > 2 || num < -2) {
         shouldUpdate = difference >= 3;
     } else {
-        shouldUpdate = true;
+        shouldUpdate = difference >= 2;
     }
 
     return shouldUpdate;
