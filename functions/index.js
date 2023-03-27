@@ -544,7 +544,7 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
 
             const message = await hotChannel.send({ embeds: [embed] });
             deal.discord_hot_message_id = message.id;
-            await db.collection(DB_DEALS_COLLECTION).doc(deal.id).set({ discord_hot_message_id: deal.discord_message_id }, { merge: true });
+            await db.collection(DB_DEALS_COLLECTION).doc(deal.id).set({ discord_hot_message_id: deal.discord_hot_message_id }, { merge: true });
 
             functions.logger.log('Discord - ' + deal.id + ' has been sent to ' + hotChannelId);
         } else if (deal.discord_message_id) {
