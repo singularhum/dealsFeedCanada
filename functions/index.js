@@ -6,6 +6,7 @@ const DB_DEALS_COLLECTION = 'deals';
 const EXPIRED_STATE = 'Expired';
 const SOLD_OUT_STATE = 'Sold Out';
 const UNTRACKED_STATE = 'Untracked';
+const DELETED_STATE = 'Deleted';
 const functions = require('firebase-functions');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
@@ -217,6 +218,7 @@ async function parseSubreddit(subredditName) {
 async function cleanDB(deals, notificationUpdatedDeals) {
     functions.logger.info('Cleaning DB');
     const twoDaysAgo = getDaysAgo(2);
+    const oneHourAgo = getHoursAgo(1);
 
     // Loop is done backwards since we are removing deals from the array.
     for (let i = dbDeals.length - 1; i >= 0; i--) {
@@ -236,10 +238,17 @@ async function cleanDB(deals, notificationUpdatedDeals) {
                     // Also send update notification that it is no longer tracked.
                     dbDeal.tag = UNTRACKED_STATE;
                     notificationUpdatedDeals.push(dbDeal);
-                } else if (dbDeal.tag !== UNTRACKED_STATE) {
+                } else if (dbDeal.tag !== UNTRACKED_STATE && db.tag !== DELETED_STATE) {
                     // Most likely the deal was deleted or could be in the next page.
                     dbDeal.date = Timestamp.fromDate(new Date());
-                    dbDeal.tag = UNTRACKED_STATE;
+
+                    // If the deal is less than an hour old, most likely it got deleted.
+                    if (dbDeal.created > oneHourAgo) {
+                        dbDeal.tag = DELETED_STATE;
+                    } else {
+                        dbDeal.tag = UNTRACKED_STATE;
+                    }
+
                     await db.collection(DB_DEALS_COLLECTION).doc(dbDeal.id).set(dbDeal);
                     notificationUpdatedDeals.push(dbDeal);
                     functions.logger.log('Recent deal ' + dbDeal.id + ' was removed or is in another page so it has been updated');
@@ -488,7 +497,7 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
         // Embed title has a limit of 256 so trim it if it exceeds.
         let title = trimString(deal.title, 250);
         if (deal.is_hot) title = '🔥 ' + title;
-        if (deal.tag === EXPIRED_STATE || deal.tag === SOLD_OUT_STATE) {
+        if (deal.tag === EXPIRED_STATE || deal.tag === SOLD_OUT_STATE || deal.tag === DELETED_STATE) {
             // Strike out the title text
             title = '~~' + title + '~~';
         }
