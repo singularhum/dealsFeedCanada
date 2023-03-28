@@ -188,25 +188,23 @@ async function parseSubreddit(subredditName) {
             dealsJson.data.children.forEach((dealJson) => {
                 const deal = {};
 
-                // Get the tag/flair that can come from different properties.
-                if (dealJson.data.link_flair_css_class) {
-                    deal.tag = dealJson.data.link_flair_css_class;
-                } else if (dealJson.data.link_flair_richtext && dealJson.data.link_flair_richtext.length >= 1) {
-                    deal.tag = dealJson.data.link_flair_richtext[0].t;
-                } else {
-                    deal.tag = null;
-                }
+                // Get the flair css class and text for setting the tag and to filter out certain posts.
+                const flairCssClass = dealJson.data.link_flair_css_class;
+                const flairText = dealJson.data.link_flair_text;
 
-                // The CSS flair can be lower case so replace it with our constant.
-                if (deal.tag === 'expired') {
-                    deal.tag = EXPIRED_STATE;
-                }
+                // Exclude certain flaired posts.
+                if (flairText !== 'Question' && flairCssClass !== 'WeeklyDiscussion' && flairCssClass !== 'Review') {
+                    if (flairText) {
+                        deal.tag = flairText;
+                    } else if (flairCssClass) {
+                        deal.tag = flairCssClass;
+                    } else {
+                        deal.tag = null;
+                    }
 
-                // reddit returns the date in unix epoch in seconds so multiple by 1000 for milliseconds.
-                deal.created = new Date(dealJson.data.created_utc * 1000);
+                    // reddit returns the date in unix epoch in seconds so multiple by 1000 for milliseconds.
+                    deal.created = new Date(dealJson.data.created_utc * 1000);
 
-                // Exclude certain posts.
-                if (deal.tag !== 'Question' && deal.tag !== 'WeeklyDiscussion' && deal.tag !== 'Review') {
                     deal.id = dealJson.data.id;
                     deal.source = subredditName;
                     deal.title = dealJson.data.title;
