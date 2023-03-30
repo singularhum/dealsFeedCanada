@@ -250,7 +250,7 @@ async function cleanDB(deals, notificationUpdatedDeals) {
             const foundDeal = deals.find((deal) => deal.id === dbDeal.id);
 
             // This dbDeal is not in the current deals list so remove/update it.
-            // Also makes there is a least one with the same source (can be empty if parsing failed).
+            // Also make sure there is a least one with the same source (can be empty if parsing failed).
             if (!foundDeal && deals.find((deal) => deal.source === dbDeal.source)) {
                 if (dbDeal.created < twoDaysAgo) {
                     // This deal is older than two days so delete it.
