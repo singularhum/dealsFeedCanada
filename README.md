@@ -45,7 +45,7 @@ I wanted a way to view and get notified of deals from various Canadian sources i
     - [Cloud Firestore](https://firebase.google.com/docs/firestore) - A NoSQL database to keep track of the deals to determine which ones are new or need to be updated
     - [Cloud Scheduler](https://firebase.google.com/docs/functions/schedule-functions) - For running a scheduled cloud function in the background using Node.js
 - [Discord.js](https://discord.js.org) - For using the Discord API to send and edit messages
-- APIs from the sources (reddit & RFD) that return JSON. They are undocumented.
+- APIs from the sources (reddit & RFD) that return JSON
 
 ### Cost
 dealsFeed Canada Discord server is provided for free. There are no ads, affiliate links or any Discord features enabled that would generate money to me.
@@ -53,12 +53,12 @@ dealsFeed Canada Discord server is provided for free. There are no ads, affiliat
 There is also no cost so far in running the service. Firebase / Google Cloud has a free tier in the Blaze plan as long as you do not exceed any quotas. The scheduled function has various limits in place to try to reduce excessive use which does introduce some limitations.
 
 ### Limitations
- - dealsFeed cannot guarantee that every single deal is sent a notification. Use of the Discord API may fail/crash and the bot does not currently attempt to resend any that are missed.
- - Deals are checked only every 10 minutes. This is to reduce API hits. Since scheduled functions can be run in shared environments, there is also a higher chance for IP bans.
- - Only the first page (25-30 deals) of each source is loaded which is also done to reduce API load. This in general is fine for detecting new deals (>30 deals posted within 10 mins would be rare) but this does impact editing of messages. Deals that fall off into the second page will no longer be updated (score and number of comments). Not a huge issue as these numbers are just to give a general idea of activity and not to be exact.
+ - The bot cannot guarantee that every deal is sent a notification and on time. Use of the various APIs may cause deals to be delayed or missed. The bot currently does not attempt to resend any that are missed.
  - There isn't much in terms of filtering specific deals you want to be notified for. For example, you can't choose to only get notified of deals with specific keywords.
+ - Deals are checked only every 10 minutes. This is to reduce API hits to start off as the rate limits are not documented for some APIs. Scheduled functions can also be run in shared environments which can cause a higher chance for IP bans if there are other apps doing the same thing.
+ - Only the first page (25-30 deals) of each source is loaded which is also done to reduce API load. This in general is fine for detecting new deals (>30 deals posted within 10 mins would be rare) but this does impact editing of messages. Deals that fall off into the second page will no longer be updated (score and number of comments). Not a huge issue as these numbers are just to give a general idea of activity and not to be exact.
  - The scheduled job instance isn't guaranteed to stay alive even when idle. This means any globals can be reset and would cause the database to be refetched. To reduce the database size, only a limited number of deals are kept. This is to reduce read costs (each item in the DB counts as 1 hit when fetching all) and time it takes to fetch and load them (time is a resource cost, even if nothing is happening).
- - The Discord API has dynamic rate limits in place and it is not generous for editing of messages. Editing just 20 messages at a time can cause the function to timeout (currently set to 40 seconds). Discord.js queues and waits on API calls once it detects the rate limit has been reached. Editing of messages isn't too important so there is logic in place to only update deals when the score or number of comments have changed a certain amount.
+ - The Discord API has dynamic rate limits in place and it is not generous for editing of messages. Editing just 15-20 messages at a time can cause the function to timeout (currently set to 40 seconds). Discord.js queues and waits on API calls once it detects the rate limit has been reached. Editing of messages isn't too important so there is logic in place to only update deals when the score or number of comments have changed a certain amount.
 
 ### Usage
 This repository is provided to show how the Discord server works and is not set up in an easy way to clone and run it right away. You will need to setup a Firebase project on the Blaze plan and configure a Discord server if you want to run it yourself.
