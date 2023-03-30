@@ -258,9 +258,11 @@ async function cleanDB(deals, notificationUpdatedDeals) {
                     dbDeals.splice(i, 1);
                     functions.logger.info('Deal ' + dbDeal.id + ' successfully deleted');
 
-                    // Also send update notification that it is no longer tracked.
-                    dbDeal.tag = UNTRACKED_STATE;
-                    notificationUpdatedDeals.push(dbDeal);
+                    if (dbDeal.tag !== UNTRACKED_STATE && db.tag !== DELETED_STATE) {
+                        // Also send update notification that it is no longer tracked.
+                        dbDeal.tag = UNTRACKED_STATE;
+                        notificationUpdatedDeals.push(dbDeal);
+                    }
                 } else if (dbDeal.tag !== UNTRACKED_STATE && db.tag !== DELETED_STATE) {
                     // Most likely the deal was deleted or could be in the next page.
                     dbDeal.date = Timestamp.fromDate(new Date());
