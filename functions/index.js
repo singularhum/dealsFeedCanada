@@ -24,10 +24,10 @@ const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 /**
  * Parses deals from sources and send notifications (currently only for Discord through a bot).
- * This function is scheduled to run every 10 minutes and has a timeout of 40 seconds.
+ * This function is scheduled to run every 5 minutes and has a timeout of 40 seconds.
  * A max of 1 instance is set since it is a scheduled job and to prevent desync of globals if there are multiple instances.
  */
-exports.parseThemDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 40 }).pubsub.schedule('every 10 minutes').onRun(async (context) => {
+exports.parseThemDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 40 }).pubsub.schedule('every 5 minutes').onRun(async (context) => {
     functions.logger.info('Scheduled Job Start');
 
     // Retrieve all deals from the DB to be able to determine what will be new or updated.
