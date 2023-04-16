@@ -10,13 +10,13 @@ dealsFeed runs as a scheduled cloud function (Firebase / Google Cloud) that curr
 
 ## Discord Server
 
-Although this is for my own personal use, you can join my [dealsFeed Canada Discord server](https://discord.gg/wFVvfR4mGf) if you would like to also receive these kind of notifications. The Discord server is only for the bot to post deals, there are no open channels to post any messages.
+Although this is for my own personal use, you can join my [dealsFeed Canada Discord server](https://discord.gg/wFVvfR4mGf) if you would like to also receive these kind of notifications. The Discord server is only for the bot to post deals. There are no open channels for anyone else to post messages.
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/1083821268652015726/widget.png?style=banner2)](https://discord.gg/wFVvfR4mGf)
 
 ### Features
 - Sends notifications when new deals are detected every 10 minutes
-- Displays and occassionaly updates the score, number of comments and flair (reddit) for each deal
+- Displays and occassionaly updates the score, number of comments and flair (reddit) or status for each deal
 - Sends seperate notifications when deals turn hot
 - Will mark deals as Expired / Sold Out when properly identified (ex. specific flairs from reddit)
 - Will ignore certain posts like daily/review discussion threads in /r/bapcsalescanada
@@ -39,7 +39,7 @@ The bot displays the score, number of comments and a flair for each deal which n
 
 - A deal will be updated when:
     - turning hot
-    - the title or flair changes
+    - the title, flair or status (expired/deleted) changes
     - the score changes a certain amount
     - the number of comments changes a certain amount
 - A deal will not be updated when:
