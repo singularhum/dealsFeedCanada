@@ -26,9 +26,6 @@ Each source has two channels (All and Hot) so you can customize which ones you w
 
 ![Screenshot of the Discord channels and sample of deals posted](https://i.imgur.com/lGcqWVN.png)
 
-### Frequency
-Deals are checked every 10 minutes. It may be reduced in the future. There is some uncertainty due to some APIs being undocumented so I don't know their rate limits to prevent IP bans.
-
 ### When are deals considered hot?
 A deal turns hot once a deal reaches a minimum score within a time range. These are my own personal preferences which may change as I test it. This was done to highlight rising deals I may have ignored or missed. This isn't perfect so price errors or low stock items might not be alive long enough to hit the hot status.
 - /r/bapcsalescanada - 20+ score within 2 hours
