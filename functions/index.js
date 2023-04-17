@@ -382,8 +382,13 @@ function shouldUpdateDeal(dbDeal, deal) {
         functions.logger.log('Previous deal update to title/tag: ' + dbDeal.id);
     } else {
         if (deal.score !== dbDeal.score) {
-            const difference = Math.abs(dbDeal.score - deal.score);
-            shouldUpdate = shouldUpdateScoreComment(difference, deal.score);
+            if (deal.source === REDFLAGDEALS && deal.tag === EXPIRED_STATE) {
+                // When RFD deal is expired/moved, the score is returned as 0 so ignore that.
+                shouldUpdate = false;
+            } else {
+                const difference = Math.abs(dbDeal.score - deal.score);
+                shouldUpdate = shouldUpdateScoreComment(difference, deal.score);
+            }
         }
 
         if (!shouldUpdate && deal.num_comments !== dbDeal.num_comments) {
