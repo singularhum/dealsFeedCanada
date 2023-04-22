@@ -297,6 +297,7 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
     let gameDealsUpdateCount = 0;
     let rfdUpdateCount = 0;
     let videoGamesUpdateCount = 0;
+    const twoDaysAgo = getDaysAgo(2);
 
     for (const deal of deals) {
         try {
@@ -349,10 +350,9 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
                     updatedDeals.push(dbDeal);
                 }
             } else {
-                // Sometimes deals will come back in the list when deals are removed/deleted
-                // so ignore them if they are over an hour older.
-                const oneHourAgo = getHoursAgo(1);
-                if (deal.created > oneHourAgo) {
+                // Sometimes old deals will come back in the list when newer deals are removed/deleted
+                // so ignore them based on the cutoff when they are deleted from the db.
+                if (deal.created > twoDaysAgo) {
                     functions.logger.log('New deal: ' + deal.id);
 
                     deal.date = Timestamp.fromDate(new Date());
