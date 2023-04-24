@@ -16,7 +16,7 @@
         },
         {
             "source": "functions/scheduled/parseFreeDeals",
-            "codebase": "scheduled-parse-freedeals",
+            "codebase": "scheduled-parse-free-deals",
             "ignore": [
                 "node_modules",
                 ".git",
