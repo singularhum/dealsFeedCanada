@@ -1,8 +1,8 @@
 {
     "functions": [
         {
-            "source": "functions",
-            "codebase": "default",
+            "source": "functions/scheduled/parseThemDeals",
+            "codebase": "scheduled-parse-them-deals",
             "ignore": [
                 "node_modules",
                 ".git",
