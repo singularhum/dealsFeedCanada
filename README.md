@@ -1,3 +1,16 @@
+# free-deals branch
+
+Currently testing having channels for limited time free deals. It is currently being run on the server but the channels are hidden until they are fully tested and ready.
+
+The channels will be:
+- Epic
+- Fanatical
+- GOG
+- Prime Gaming
+- Steam
+- Ubisoft
+- Unreal Engine Marketplace
+
 # dealsFeed Canada
 
 A bot that sends Discord notifications for new deals posted on popular Canadian-based communities:
