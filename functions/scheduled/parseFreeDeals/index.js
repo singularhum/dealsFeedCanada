@@ -408,16 +408,18 @@ async function saveDB(dbFreeDeals, freeDeals, source) {
     // Checking for new deals.
     for (const freeDeal of freeDeals) {
         try {
-            const dbfreeDeal = dbFreeDeals.find((dbfreeDeal) => dbfreeDeal.id === freeDeal.id);
+            if (freeDeal.source === source) {
+                const dbfreeDeal = dbFreeDeals.find((dbfreeDeal) => dbfreeDeal.id === freeDeal.id);
 
-            if (!dbfreeDeal) {
-                functions.logger.log('New free deal: ' + freeDeal.id);
+                if (!dbfreeDeal) {
+                    functions.logger.log('New free deal: ' + freeDeal.id);
 
-                dbFreeDeals.push(freeDeal);
+                    dbFreeDeals.push(freeDeal);
 
-                // Save to DB and set as isNew for notifications.
-                await db.collection(DB_COLLECTION).doc(freeDeal.id).set(freeDeal);
-                freeDeal.isNew = true;
+                    // Save to DB and set as isNew for notifications.
+                    await db.collection(DB_COLLECTION).doc(freeDeal.id).set(freeDeal);
+                    freeDeal.isNew = true;
+                }
             }
         } catch (error) {
             functions.logger.error('Saving free deal ' + freeDeal.id + ' failed', error);
