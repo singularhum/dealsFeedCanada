@@ -139,8 +139,6 @@ async function parseGOG(dbFreeDeals, freeDeals) {
                 freeDeal.type = null;
                 freeDeal.expiryDate = new Date(parseInt($('.giveaway-banner__countdown-timer').attr('end-date')));
                 freeDeals.push(freeDeal);
-
-                console.log(freeDeal);
             }
 
             await saveDB(dbFreeDeals, freeDeals, GOG);
