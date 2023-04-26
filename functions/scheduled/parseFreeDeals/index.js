@@ -418,6 +418,11 @@ async function saveDB(dbFreeDeals, freeDeals, source) {
                 if (!dbfreeDeal) {
                     functions.logger.log('New free deal: ' + freeDeal.id);
 
+                    const expiryDate = await getExpiryDate(freeDeal);
+                    if (expiryDate) {
+                        freeDeal.expiryDate = expiryDate;
+                    }
+
                     dbFreeDeals.push(freeDeal);
 
                     // Save to DB and set as isNew for notifications.
@@ -453,6 +458,57 @@ async function saveDB(dbFreeDeals, freeDeals, source) {
             functions.logger.error('Error removing free deal ' + dbFreeDeals[i].id, error);
         }
     }
+}
+
+/**
+ * Get expiry dates for sources where the original API/search does not include them.
+ * @param {Object} freeDeal The free deal to get the expiry from.
+ * @return {Date} The expiry date.
+ */
+async function getExpiryDate(freeDeal) {
+    let expiryDate = null;
+
+    try {
+        if (freeDeal.source === STEAM) {
+            const link = buildLink(freeDeal);
+
+            const response = await fetch(link, {
+                method: 'get',
+                signal: AbortSignal.timeout(5000),
+            });
+
+            if (response.ok) {
+                const $ = cheerio.load(await response.text());
+                const discountExpiryText = $('.game_purchase_discount_quantity').text();
+
+                const dayMonthResult = discountExpiryText.match(/\d{1,2}\s\w{3}/); // dd mmm
+                const dayMonth2Result = discountExpiryText.match(/\w{3}\s\d{1,2}/); // mmm dd
+                const timeResult = discountExpiryText.match(/\d{1,2}:\d{2}/);
+                const amPmResult = discountExpiryText.match(/[ap]m/);
+
+                if ((dayMonthResult || dayMonth2Result) && timeResult && amPmResult) {
+                    // Depending on locale it can be in either format on the page.
+                    let dayMonth = null;
+                    if (dayMonthResult) {
+                        dayMonth = dayMonthResult[0];
+                    } else {
+                        dayMonth = dayMonth2Result[0];
+                    }
+
+                    // Need to find better way to determine the expiry for steam. Fetch seems to default to GMT-7 so will need to offset for UTC.
+                    expiryDate = new Date(Date.parse(util.format('%s, %s %s %s -07:00', dayMonth, new Date().getFullYear(), timeResult[0], amPmResult[0])));
+                } else {
+                    functions.logger.error('Getting expiry date failed for ' + freeDeal.id + '. Text: ' + discountExpiryText);
+                }
+            } else {
+                functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);
+            }
+        }
+    } catch (e) {
+        functions.logger.error('Getting expiry date failed for ' + freeDeal.id, e);
+    }
+
+    return expiryDate;
 }
 
 /**
@@ -547,7 +603,7 @@ async function sendNewToDiscord(freeDeal) {
             .setTitle(title)
             .setURL(link)
             .setColor(2303786);
-            setMessageDescriptionTimestamp(embed, freeDeal);
+        setMessageDescriptionTimestamp(embed, freeDeal);
 
         const message = await channel.send({ embeds: [embed] });
         freeDeal.discord_message_id = message.id;
@@ -576,7 +632,7 @@ async function sendExpiredToDiscord(freeDeal) {
             .setTitle(title)
             .setURL(link)
             .setColor(2303786);
-            setMessageDescriptionTimestamp(embed, freeDeal);
+        setMessageDescriptionTimestamp(embed, freeDeal);
 
         let message = await channel.messages.fetch(freeDeal.discord_message_id);
         if (message) {
