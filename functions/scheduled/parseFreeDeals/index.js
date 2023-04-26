@@ -68,6 +68,10 @@ async function fetchDB() {
     // Firestore returns the dates as Timestamp so convert to date.
     dbFreeDeals.forEach((dbFreeDeal) => {
         dbFreeDeal.date = dbFreeDeal.date.toDate();
+
+        if (dbFreeDeal.expiryDate) {
+            dbFreeDeal.expiryDate = dbFreeDeal.expiryDate.toDate();
+        }
     });
 
     return dbFreeDeals;
@@ -543,7 +547,7 @@ async function sendNewToDiscord(freeDeal) {
             .setTitle(title)
             .setURL(link)
             .setColor(2303786);
-        setEmbedTimestamp(embed, freeDeal);
+            setMessageDescriptionTimestamp(embed, freeDeal);
 
         const message = await channel.send({ embeds: [embed] });
         freeDeal.discord_message_id = message.id;
@@ -572,7 +576,7 @@ async function sendExpiredToDiscord(freeDeal) {
             .setTitle(title)
             .setURL(link)
             .setColor(2303786);
-        setEmbedTimestamp(embed, freeDeal);
+            setMessageDescriptionTimestamp(embed, freeDeal);
 
         let message = await channel.messages.fetch(freeDeal.discord_message_id);
         if (message) {
@@ -634,7 +638,7 @@ function buildTitle(freeDeal) {
  * @param {Object} freeDeal The free deal.
  * @return {EmbedBuilder} The updated embed.
  */
-function setEmbedTimestamp(embed, freeDeal) {
+function setMessageDescriptionTimestamp(embed, freeDeal) {
     try {
         if (freeDeal.expiryDate) {
             const unixTimestamp = Math.floor(freeDeal.expiryDate.getTime() / 1000);
