@@ -213,9 +213,9 @@ async function parseEpic(dbFreeDeals, freeDeals) {
             const json = await response.json();
 
             json.data.Catalog.searchStore.elements.forEach((gameJson) => {
-                if (gameJson.price.totalPrice.discountPrice === 0) {
+                if (gameJson.price.totalPrice.discountPrice === 0 && gameJson.promotions.promotionalOffers.length > 0) {
                     const freeDeal = {};
-                    freeDeal.id = gameJson.urlSlug;
+                    freeDeal.id = gameJson.catalogNs.mappings[0].pageSlug;
                     freeDeal.source = EPIC;
                     freeDeal.date = new Date();
                     freeDeal.title = gameJson.title;
