@@ -163,32 +163,48 @@ async function parseFanatical(dbFreeDeals, freeDeals) {
     try {
         functions.logger.log('Parsing Fanatical');
 
-        const response = await fetch(`${process.env.FANATICAL_SEARCH_URL}`, {
-            method: 'post',
-            headers: { 'Content-Type': 'application/json' },
-            body: `${process.env.FANATICAL_SEARCH_BODY}`,
+        const keyResponse = await fetch(`${process.env.FANATICAL_KEY_URL}`, {
+            method: 'get',
             signal: AbortSignal.timeout(5000),
         });
 
-        if (response.ok) {
-            const json = await response.json();
+        if (keyResponse.ok) {
+            const textResponse = await keyResponse.text();
 
-            json.results[0].hits.forEach((gameJson) => {
-                if (gameJson.giveaway === true || gameJson.price.CAD === 0) {
-                    const freeDeal = {};
-                    freeDeal.id = gameJson.slug;
-                    freeDeal.source = FANATICAL;
-                    freeDeal.date = new Date();
-                    freeDeal.title = gameJson.name;
-                    freeDeal.type = gameJson.type;
+            const keyMatches = textResponse.match(new RegExp(`${process.env.FANATICAL_KEY_MATCH}`));
+            if (keyMatches) {
+                const key = keyMatches[0].replace(`${process.env.FANATICAL_KEY_REPLACE}`.replace('\\', ''), '').replace('\'', '');
 
-                    freeDeals.push(freeDeal);
+                const response = await fetch(util.format(`${process.env.FANATICAL_SEARCH_URL}`, key), {
+                    method: 'post',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: `${process.env.FANATICAL_SEARCH_BODY}`,
+                    signal: AbortSignal.timeout(5000),
+                });
+
+                if (response.ok) {
+                    const json = await response.json();
+
+                    json.results[0].hits.forEach((gameJson) => {
+                        if (gameJson.giveaway === true || gameJson.price.CAD === 0) {
+                            const freeDeal = {};
+                            freeDeal.id = gameJson.slug;
+                            freeDeal.source = FANATICAL;
+                            freeDeal.date = new Date();
+                            freeDeal.title = gameJson.name;
+                            freeDeal.type = gameJson.type;
+
+                            freeDeals.push(freeDeal);
+                        }
+                    });
+
+                    await saveDB(dbFreeDeals, freeDeals, FANATICAL);
+                } else {
+                    functions.logger.error('Parsing Fanatical failed', response);
                 }
-            });
-
-            await saveDB(dbFreeDeals, freeDeals, FANATICAL);
+            }
         } else {
-            functions.logger.error('Parsing Fanatical failed', response);
+            functions.logger.error('Parsing Fanatical failed', keyResponse);
         }
     } catch (e) {
         functions.logger.error('Parsing Fanatical failed', e);
@@ -383,7 +399,7 @@ async function parsePrimeGaming(dbFreeDeals, freeDeals) {
                         try {
                             freeDeal.expiryDate = new Date(gameJson.offers[0].endTime);
                         } catch (e) {
-                            functions.logger.error('Parsing UE Marketplace expiry date failed', e);
+                            functions.logger.error('Parsing Prime Gaming expiry date failed', e);
                         }
 
                         freeDeals.push(freeDeal);
