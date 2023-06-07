@@ -496,6 +496,7 @@ async function getExpiryDate(freeDeal) {
 
             const response = await fetch(link, {
                 method: 'get',
+                headers: { 'Cookie': 'wants_mature_content=1; birthtime=0; lastagecheckage=1-0-1900;' },
                 signal: AbortSignal.timeout(5000),
             });
 
