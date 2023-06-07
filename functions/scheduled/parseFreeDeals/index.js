@@ -3,6 +3,7 @@ const FANATICAL = 'Fanatical';
 const GOG = 'GOG';
 const INDIEGALA = 'IndieGala';
 const PRIME_GAMING = 'Prime Gaming';
+const RFD_FREEBIES = 'RedFlagDeals-Freebies';
 const STEAM = 'Steam';
 const UBISOFT = 'Ubisoft';
 const UE_MARKETPLACE = 'UE Marketplace';
@@ -45,6 +46,7 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
     await parseUEMarketplace(_dbFreeDeals, freeDeals);
     await parsePrimeGaming(_dbFreeDeals, freeDeals);
     await parseIndieGala(_dbFreeDeals, freeDeals);
+    await parseRfdFreebies(_dbFreeDeals, freeDeals);
 
     await sendNotifications(freeDeals);
 
@@ -465,6 +467,49 @@ async function parseIndieGala(dbFreeDeals, freeDeals) {
 }
 
 /**
+ * Parse RFD freebies forum for free deals.
+ * @param {Array} dbFreeDeals An array of the free deals in the DB.
+ * @param {Array} freeDeals An array of the free deals being parsed.
+ */
+async function parseRfdFreebies(dbFreeDeals, freeDeals) {
+    try {
+        functions.logger.log('Parsing RFD Freebies');
+
+        const response = await fetch(`${process.env.RFD_FREEBIES_API_URL}`, {
+            method: 'get',
+            headers: { 'Content-Type': 'application/json' },
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (response.ok) {
+            const freebiesJson = await response.json();
+
+            freebiesJson.topics.forEach((freebieJson) => {
+                const freeDeal = {};
+
+                freeDeal.id = freebieJson.topic_id.toString();
+                freeDeal.source = RFD_FREEBIES;
+                freeDeal.date = new Date();
+                freeDeal.title = freebieJson.title;
+                if (freebieJson.offer && freebieJson.offer.dealer_name) {
+                    // Retailer is not part of the title so we must add it in.
+                    freeDeal.title = '[' + freebieJson.offer.dealer_name + '] ' + freeDeal.title;
+                }
+                freeDeal.type = null;
+
+                freeDeals.push(freeDeal);
+            });
+
+            await saveDB(dbFreeDeals, freeDeals, RFD_FREEBIES);
+        } else {
+            functions.logger.error('Parsing RFD Freebies failed', response);
+        }
+    } catch (e) {
+        functions.logger.error('Parsing RFD Freebies failed', e);
+    }
+}
+
+/**
  * Go through the free deals and update DB if new or expired.
  * @param {Array} dbFreeDeals An array of the free deals in the DB.
  * @param {Array} freeDeals The free deals parsed.
@@ -509,11 +554,14 @@ async function saveDB(dbFreeDeals, freeDeals, source) {
                     await db.collection(DB_COLLECTION).doc(dbFreeDeal.id).delete();
                     dbFreeDeals.splice(i, 1);
 
-                    // Set as expired and add to array to send udpate notifications.
-                    dbFreeDeal.isExpired = true;
-                    freeDeals.push(dbFreeDeal);
-
-                    functions.logger.info('Free deal ' + dbFreeDeal.id + ' has expired');
+                    if (source === RFD_FREEBIES) {
+                        functions.logger.info('Free deal ' + dbFreeDeal.id + ' removed from DB');
+                    } else {
+                        // Set as expired and add to array to send udpate notifications.
+                        dbFreeDeal.isExpired = true;
+                        freeDeals.push(dbFreeDeal);
+                        functions.logger.info('Free deal ' + dbFreeDeal.id + ' has expired');
+                    }
                 }
             }
         } catch (error) {
@@ -731,6 +779,8 @@ function buildLink(freeDeal) {
         } else {
             link = 'https://gaming.amazon.com/home';
         }
+    } else if (freeDeal.source === RFD_FREEBIES) {
+        link = util.format('https://forums.redflagdeals.com/viewtopic.php?t=%s', freeDeal.id);
     } else if (freeDeal.source === STEAM) {
         link = util.format('https://store.steampowered.com/%s/%s/', freeDeal.type, freeDeal.id);
     } else if (freeDeal.source === UBISOFT) {
@@ -750,7 +800,11 @@ function buildLink(freeDeal) {
  * @return {string} A full URL for the free deal.
  */
 function buildTitle(freeDeal) {
-    return util.format('[%s] %s (Free / 100% Off)', freeDeal.source, freeDeal.title);
+    if (freeDeal.source === RFD_FREEBIES) {
+        return freeDeal.title;
+    } else {
+        return util.format('[%s] %s (Free / 100% Off)', freeDeal.source, freeDeal.title);
+    }
 }
 
 /**
@@ -796,6 +850,8 @@ function getDiscordChannelId(source) {
         channelId = `${process.env.INDIEGALA_DISCORD_CHANNEL}`;
     } else if (source === PRIME_GAMING) {
         channelId = `${process.env.PRIME_GAMING_DISCORD_CHANNEL}`;
+    } else if (source === RFD_FREEBIES) {
+        channelId = `${process.env.RFD_FREEBIES_DISCORD_CHANNEL}`;
     } else if (source === STEAM) {
         channelId = `${process.env.STEAM_DISCORD_CHANNEL}`;
     } else if (source === UBISOFT) {
