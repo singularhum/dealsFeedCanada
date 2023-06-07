@@ -14,6 +14,13 @@ const { setTimeout } = require('timers/promises');
 const { Client, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const util = require('util');
 
+const scheduledRuntimeOptions = {
+    maxInstances: 1,
+    timeoutSeconds: 40,
+    vpcConnector: 'dealsfeedcanada-svpc',
+    vpcConnectorEgressSettings: functions.VPC_EGRESS_SETTINGS_OPTIONS[2],
+};
+
 // Initialize firebase
 initializeApp();
 
@@ -27,7 +34,7 @@ const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
  * This function is scheduled to run every 5 minutes and has a timeout of 40 seconds.
  * A max of 1 instance is set since it is a scheduled job and to prevent desync of globals if there are multiple instances.
  */
-exports.parseThemDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 40 }).pubsub.schedule('every 5 minutes').onRun(async (context) => {
+exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.schedule('every 5 minutes').onRun(async (context) => {
     functions.logger.info('Scheduled Job Start');
 
     // Retrieve all deals from the DB to be able to determine what will be new or updated.
@@ -178,7 +185,10 @@ async function parseSubreddit(subredditName) {
         // Uses .json in the path to return json and is sorted by new.
         const response = await fetch(util.format(`${process.env.SUBREDDIT_API_URL}`, subredditName), {
             method: 'get',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'User-Agent': 'dealsfeedcanada:v1',
+            },
             signal: AbortSignal.timeout(5000),
         });
 
