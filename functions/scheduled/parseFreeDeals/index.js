@@ -1,6 +1,7 @@
 const EPIC = 'Epic';
 const FANATICAL = 'Fanatical';
 const GOG = 'GOG';
+const INDIEGALA = 'IndieGala';
 const PRIME_GAMING = 'Prime Gaming';
 const STEAM = 'Steam';
 const UBISOFT = 'Ubisoft';
@@ -43,6 +44,7 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
     await parseUbisoft(_dbFreeDeals, freeDeals);
     await parseUEMarketplace(_dbFreeDeals, freeDeals);
     await parsePrimeGaming(_dbFreeDeals, freeDeals);
+    await parseIndieGala(_dbFreeDeals, freeDeals);
 
     await sendNotifications(freeDeals);
 
@@ -425,6 +427,44 @@ async function parsePrimeGaming(dbFreeDeals, freeDeals) {
 }
 
 /**
+ * Parse IndieGala freebies for free games.
+ * @param {Array} dbFreeDeals An array of the free deals in the DB.
+ * @param {Array} freeDeals An array of the free deals being parsed.
+ */
+async function parseIndieGala(dbFreeDeals, freeDeals) {
+    try {
+        functions.logger.log('Parsing IndieGala');
+
+        const response = await fetch(`${process.env.INDIEGALA_FREEBIES_URL}`, {
+            method: 'get',
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (response.ok) {
+            const $ = cheerio.load(await response.text());
+            const freebiesElements = $('.products-col-inner');
+
+            freebiesElements.each((i, gameElement) => {
+                const freeDeal = {};
+                freeDeal.id = $(gameElement).find('.fit-click').attr('href').replace('https://freebies.indiegala.com/', '');
+                freeDeal.source = INDIEGALA;
+                freeDeal.date = new Date();
+                freeDeal.title = $(gameElement).find('.product-title').text();
+                freeDeal.type = null;
+
+                freeDeals.push(freeDeal);
+            });
+
+            await saveDB(dbFreeDeals, freeDeals, INDIEGALA);
+        } else {
+            functions.logger.error('Parsing IndieGala failed', response);
+        }
+    } catch (e) {
+        functions.logger.error('Parsing IndieGala failed', e);
+    }
+}
+
+/**
  * Go through the free deals and update DB if new or expired.
  * @param {Array} dbFreeDeals An array of the free deals in the DB.
  * @param {Array} freeDeals The free deals parsed.
@@ -683,6 +723,8 @@ function buildLink(freeDeal) {
         link = util.format('https://www.fanatical.com/en/%s/%s', freeDeal.type, freeDeal.id);
     } else if (freeDeal.source === GOG) {
         link = util.format('https://www.gog.com/en/game/%s', freeDeal.id);
+    } else if (freeDeal.source === INDIEGALA) {
+        link = util.format('https://freebies.indiegala.com/%s', freeDeal.id);
     } else if (freeDeal.source === PRIME_GAMING) {
         if (freeDeal.externalClaimLink) {
             link = freeDeal.externalClaimLink;
@@ -750,6 +792,8 @@ function getDiscordChannelId(source) {
         channelId = `${process.env.FANATICAL_DISCORD_CHANNEL}`;
     } else if (source === GOG) {
         channelId = `${process.env.GOG_DISCORD_CHANNEL}`;
+    } else if (source === INDIEGALA) {
+        channelId = `${process.env.INDIEGALA_DISCORD_CHANNEL}`;
     } else if (source === PRIME_GAMING) {
         channelId = `${process.env.PRIME_GAMING_DISCORD_CHANNEL}`;
     } else if (source === STEAM) {

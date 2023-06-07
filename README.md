@@ -6,6 +6,7 @@ The channels will be:
 - Epic
 - Fanatical
 - GOG
+- IndieGala
 - Prime Gaming
 - Steam
 - Ubisoft
