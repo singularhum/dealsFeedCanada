@@ -13,10 +13,11 @@ module.exports = {
   rules: {
     'no-restricted-globals': ['error', 'name', 'length'],
     'prefer-arrow-callback': 'error',
-    'quotes': [2, 'single', {'avoidEscape': true, 'allowTemplateLiterals': true}],
+    'quotes': [2, 'single', { 'avoidEscape': true, 'allowTemplateLiterals': true }],
     'max-len': 0,
     'object-curly-spacing': 0,
     'indent': 0,
+    'linebreak-style': 0,
   },
   overrides: [
     {
