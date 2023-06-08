@@ -567,7 +567,7 @@ async function saveDB(dbFreeDeals, freeDeals, source) {
             if (dbFreeDeal.source === source) {
                 const foundFreeDeal = freeDeals.find((freeDeal) => freeDeal.id === dbFreeDeal.id);
 
-                if (!foundFreeDeal) {
+                if (!foundFreeDeal && (!dbFreeDeal.expiryDate || new Date() > dbFreeDeal.expiryDate)) {
                     // Delete from DB and remove from array.
                     await db.collection(DB_COLLECTION).doc(dbFreeDeal.id).delete();
                     dbFreeDeals.splice(i, 1);
