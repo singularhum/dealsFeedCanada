@@ -845,7 +845,14 @@ function setMessageDescriptionTimestamp(embed, freeDeal) {
                 formatType = 'D';
             }
 
-            embed.setDescription(util.format('Expires <t:%s:%s>', unixTimestamp, formatType));
+            let expireText;
+            if (freeDeal.isExpired) {
+                expireText = 'Expired';
+            } else {
+                expireText = 'Expires';
+            }
+
+            embed.setDescription(util.format('%s <t:%s:%s>', expireText, unixTimestamp, formatType));
         }
     } catch (e) {
         functions.logger.error('Discord - Failed to set footer for ' + freeDeal.id, e);
