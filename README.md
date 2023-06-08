@@ -6,8 +6,8 @@ The channels will be:
 - Epic
 - Fanatical
 - GOG
-- IndieGala
 - Prime Gaming
+- RedFlagDeals Freebies
 - Steam
 - Ubisoft
 - Unreal Engine Marketplace
