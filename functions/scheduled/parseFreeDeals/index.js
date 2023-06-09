@@ -572,7 +572,7 @@ async function saveDB(dbFreeDeals, freeDeals, source) {
                     await db.collection(DB_COLLECTION).doc(dbFreeDeal.id).delete();
                     dbFreeDeals.splice(i, 1);
 
-                    if (source === RFD_FREEBIES) {
+                    if (source === RFD_FREEBIES || source === INDIEGALA) {
                         functions.logger.info('Free deal ' + dbFreeDeal.id + ' removed from DB');
                     } else {
                         // Set as expired and add to array to send udpate notifications.
