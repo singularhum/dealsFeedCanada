@@ -98,11 +98,11 @@ async function logIP() {
     try {
         const response = await fetch(`${process.env.IP_API_URL}`, {
             method: 'get',
-            signal: AbortSignal.timeout(1000),
+            signal: AbortSignal.timeout(2000),
         });
 
         if (response.ok) {
-            functions.logger.log(await response.text());
+            functions.logger.log('IP: ' + await response.text());
         } else {
             functions.logger.error('Get IP failed', response);
         }
