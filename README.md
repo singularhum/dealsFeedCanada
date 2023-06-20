@@ -1,6 +1,6 @@
 # dealsFeed Canada
 
-dealsFeed Canada is a [Discord server](https://discord.gg/wFVvfR4mGf) that sends notifications for new deals posted on popular Canadian-based communities and limited-time free deals.
+dealsFeed Canada is a [Discord server](https://discord.gg/wFVvfR4mGf) that sends notifications for new deals posted on popular Canadian-based communities and as well as limited-time free deals.
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/1083821268652015726/widget.png?style=banner2)](https://discord.gg/wFVvfR4mGf)
 
@@ -19,7 +19,7 @@ dealsFeed Canada is a [Discord server](https://discord.gg/wFVvfR4mGf) that sends
 - [RFD Freebies](https://forums.redflagdeals.com/freebies-f12/?sk=tt&rfd_sk=tt&sd=d) - Freebies forum on RFD
 - [Steam](https://store.steampowered.com/) - Free to keep Steam games (does not include free-to-play or free weekend games)
 - [~~Ubisoft~~](https://store.ubisoft.com) - Currently not available (untested as there hasn't been a free game in awhile)
-- [Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/) - Free assets for the Unreal Engine
+- [Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/) - Free monthly assets for the Unreal Engine
 
 \* IndieGala blocks IPs from Google Cloud so this currently uses an alternative source which can be quite delayed.
 
