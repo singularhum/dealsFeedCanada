@@ -13,6 +13,20 @@
             "predeploy": [
                 "npm --prefix \"$RESOURCE_DIR\" run lint"
             ]
+        },
+        {
+            "source": "functions/scheduled/parseFreeDeals",
+            "codebase": "scheduled-parse-free-deals",
+            "ignore": [
+                "node_modules",
+                ".git",
+                "firebase-debug.log",
+                "firebase-debug.*.log",
+                "credentials.json"
+            ],
+            "predeploy": [
+                "npm --prefix \"$RESOURCE_DIR\" run lint"
+            ]
         }
     ]
 }
