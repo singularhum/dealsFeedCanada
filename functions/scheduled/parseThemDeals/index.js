@@ -29,10 +29,10 @@ const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 /**
  * Parses deals from sources and send notifications (currently only for Discord through a bot).
- * This function is scheduled to run every 5 minutes and has a timeout of 40 seconds.
+ * This function is scheduled to run every minute and has a timeout of 40 seconds.
  * A max of 1 instance is set since it is a scheduled job and to prevent desync of globals if there are multiple instances.
  */
-exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.schedule('every 5 minutes').onRun(async (context) => {
+exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.schedule('every 1 minutes').onRun(async (context) => {
     functions.logger.info('Scheduled Job Start');
 
     // Retrieve all deals from the DB to be able to determine what will be new or updated.
@@ -44,8 +44,11 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
     const newlyHotDeals = [];
     const updatedDeals = [];
 
-    // Go get those deals sir!
-    deals.push(...await parseRedFlagDeals());
+    // Only do RFD on every 5 minutes in the hour.
+    if ((new Date).getMinutes() % 5 === 0) {
+        logIP();
+        deals.push(...await parseRedFlagDeals());
+    }
 
     const redditAccessToken = await getRedditAccessToken();
     if (redditAccessToken) {
@@ -86,6 +89,26 @@ async function fetchDbDeals() {
     });
 
     return deals;
+}
+
+/**
+ * Logs the IP address being used for the function.
+ */
+async function logIP() {
+    try {
+        const response = await fetch(`${process.env.IP_API_URL}`, {
+            method: 'get',
+            signal: AbortSignal.timeout(1000),
+        });
+
+        if (response.ok) {
+            functions.logger.log(await response.text());
+        } else {
+            functions.logger.error('Get IP failed', response);
+        }
+    } catch (e) {
+        functions.logger.error('Get IP failed', e);
+    }
 }
 
 /**
