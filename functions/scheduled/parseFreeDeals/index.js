@@ -189,20 +189,22 @@ async function parseFanatical(dbFreeDeals, freeDeals) {
                 if (response.ok) {
                     const json = await response.json();
 
-                    json.results[0].hits.forEach((gameJson) => {
-                        if (gameJson.giveaway === true || gameJson.price.CAD === 0) {
-                            const freeDeal = {};
-                            freeDeal.id = gameJson.slug;
-                            freeDeal.source = FANATICAL;
-                            freeDeal.date = new Date();
-                            freeDeal.title = gameJson.name;
-                            freeDeal.type = gameJson.type;
+                    if (json.results[0].hits.length > 0) {
+                        json.results[0].hits.forEach((gameJson) => {
+                            if (gameJson.giveaway === true || gameJson.price.CAD === 0) {
+                                const freeDeal = {};
+                                freeDeal.id = gameJson.slug;
+                                freeDeal.source = FANATICAL;
+                                freeDeal.date = new Date();
+                                freeDeal.title = gameJson.name;
+                                freeDeal.type = gameJson.type;
 
-                            freeDeals.push(freeDeal);
-                        }
-                    });
+                                freeDeals.push(freeDeal);
+                            }
+                        });
 
-                    await saveDB(dbFreeDeals, freeDeals, FANATICAL);
+                        await saveDB(dbFreeDeals, freeDeals, FANATICAL);
+                    }
                 } else {
                     functions.logger.error('Parsing Fanatical failed', response);
                 }
