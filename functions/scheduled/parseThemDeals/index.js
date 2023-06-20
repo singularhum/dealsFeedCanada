@@ -46,9 +46,15 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
 
     // Go get those deals sir!
     deals.push(...await parseRedFlagDeals());
-    deals.push(...await parseSubreddit(BAPCSALESCANADA));
-    deals.push(...await parseSubreddit(GAMEDEALS));
-    deals.push(...await parseSubreddit(VIDEOGAMEDEALSCANADA));
+
+    const redditAccessToken = await getRedditAccessToken();
+    if (redditAccessToken) {
+        deals.push(...await parseSubreddit(BAPCSALESCANADA, redditAccessToken));
+        deals.push(...await parseSubreddit(GAMEDEALS, redditAccessToken));
+        deals.push(...await parseSubreddit(VIDEOGAMEDEALSCANADA, redditAccessToken));
+
+        revokeRedditAccessToken(redditAccessToken);
+    }
 
     await cleanDB(deals, updatedDeals);
     await saveDeals(deals, newDeals, newlyHotDeals, updatedDeals);
@@ -169,11 +175,74 @@ async function parseRedFlagDeals() {
 }
 
 /**
+ * Retrieve an access token for using the Reddit API.
+ * @return {string} The access token.
+ */
+async function getRedditAccessToken() {
+    functions.logger.log('Retrieving access token for Reddit API');
+    let accessToken = '';
+
+    try {
+        const response = await fetch(`${process.env.REDDIT_TOKEN_URL}`, {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': `${process.env.REDDIT_USER_AGENT}`,
+                'Authorization': `${process.env.REDDIT_AUTH_HEADER}`,
+            },
+            body: 'grant_type=client_credentials',
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (response.ok) {
+            const json = await response.json();
+            accessToken = json.access_token;
+        } else {
+            functions.logger.error('Error retrieving access token for Reddit API failed');
+        }
+    } catch (e) {
+        functions.logger.error('Error retrieving access token for Reddit API failed', e);
+    }
+
+    return accessToken;
+}
+
+/**
+ * Revokes an access token used for the Reddit API.
+ * @param {string} accessToken The Reddit API access token.
+ */
+async function revokeRedditAccessToken(accessToken) {
+    functions.logger.log('Revoking access token for Reddit API');
+
+    try {
+        const response = await fetch(`${process.env.REDDIT_REVOKE_TOKEN_URL}`, {
+            method: 'post',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': `${process.env.REDDIT_USER_AGENT}`,
+                'Authorization': `${process.env.REDDIT_AUTH_HEADER}`,
+            },
+            body: 'token=' + accessToken + '&token_type_hint=access_token',
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (!response.ok) {
+            functions.logger.error('Error revoking access token for Reddit API failed');
+        }
+    } catch (e) {
+        functions.logger.error('Error revoking access token for Reddit API failed', e);
+    }
+
+    return accessToken;
+}
+
+/**
  * Parse supplied subreddit.
  * @param {string} subredditName The name of the subreddit to parse.
+ * @param {string} accessToken The access token to use the Reddit API.
  * @return {Array} An array of the deals parsed.
  */
-async function parseSubreddit(subredditName) {
+async function parseSubreddit(subredditName, accessToken) {
     functions.logger.log('Parsing ' + subredditName);
     const deals = [];
 
@@ -184,8 +253,8 @@ async function parseSubreddit(subredditName) {
         const response = await fetch(util.format(`${process.env.SUBREDDIT_API_URL}`, subredditName), {
             method: 'get',
             headers: {
-                'Content-Type': 'application/json',
-                'User-Agent': 'dealsfeedcanada:v1',
+                'User-Agent': `${process.env.REDDIT_USER_AGENT}`,
+                'Authorization': 'Bearer ' + accessToken,
             },
             signal: AbortSignal.timeout(5000),
         });
