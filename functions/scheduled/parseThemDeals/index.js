@@ -17,8 +17,6 @@ const util = require('util');
 const scheduledRuntimeOptions = {
     maxInstances: 1,
     timeoutSeconds: 40,
-    vpcConnector: 'dealsfeedcanada-svpc',
-    vpcConnectorEgressSettings: functions.VPC_EGRESS_SETTINGS_OPTIONS[2],
 };
 
 // Initialize firebase
