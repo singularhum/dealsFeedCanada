@@ -47,7 +47,7 @@ Each main source has two channels (All and Hot) so you can customize which ones 
 
 Free deals are in a separate category and are displayed differently since they are directly linked instead of being from a user-generated post.
 
-![Screenshot of the Free Deals channels](https://i.imgur.com/bkUVHrF.png))
+![Screenshot of the Free Deals channels](https://i.imgur.com/bkUVHrF.png)
 
 ### When are deals considered hot?
 A deal turns hot once a deal reaches a minimum score within a time range. These are my own personal preferences which may change as I test it. This was done to highlight rising deals I may have ignored or missed. This isn't perfect so price errors or low stock items might not be alive long enough to hit the hot status.
