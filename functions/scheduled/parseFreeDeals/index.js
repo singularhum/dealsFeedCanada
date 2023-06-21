@@ -37,10 +37,14 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
     if (!_dbFreeDeals) _dbFreeDeals = await fetchDB();
 
     const freeDeals = [];
+    const currentDate = new Date();
 
     await parseSteam(_dbFreeDeals, freeDeals);
     await parseGOG(_dbFreeDeals, freeDeals);
-    await parseFanatical(_dbFreeDeals, freeDeals);
+    if (currentDate.getHours() !== 3) {
+        // Free games tend to disappear and come back in this hour so ignore for now.
+        await parseFanatical(_dbFreeDeals, freeDeals);
+    }
     await parseEpic(_dbFreeDeals, freeDeals);
     await parseUbisoft(_dbFreeDeals, freeDeals);
     await parseUEMarketplace(_dbFreeDeals, freeDeals);
