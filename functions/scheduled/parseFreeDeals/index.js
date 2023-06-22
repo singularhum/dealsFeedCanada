@@ -41,7 +41,7 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
 
     await parseSteam(_dbFreeDeals, freeDeals);
     await parseGOG(_dbFreeDeals, freeDeals);
-    if (currentDate.getHours() !== 3) {
+    if (currentDate.getHours() !== 7) {
         // Free games tend to disappear and come back in this hour so ignore for now.
         await parseFanatical(_dbFreeDeals, freeDeals);
     }
