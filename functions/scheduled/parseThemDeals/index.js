@@ -120,7 +120,7 @@ async function parseRedFlagDeals() {
     const deals = [];
 
     try {
-        const twoHoursAgo = getHoursAgo(2);
+        const sixHoursAgo = getHoursAgo(6);
 
         // Use forum 9 (hot deals) with the date sorted descending. 30 per page is the max (sometimes less with stickied sponsored posts).
         const response = await fetch(`${process.env.RFD_API_URL}`, {
@@ -157,7 +157,7 @@ async function parseRedFlagDeals() {
                     deal.tag = null;
                 }
 
-                deal.is_hot = deal.created > twoHoursAgo && deal.score >= 20;
+                deal.is_hot = deal.created > sixHoursAgo && deal.score >= 20;
                 deal.num_comments = dealJson.total_replies;
 
                 deals.push(deal);
@@ -270,7 +270,7 @@ async function parseSubreddit(subredditName, accessToken) {
     const deals = [];
 
     try {
-        const twoHoursAgo = getHoursAgo(2);
+        const sixHoursAgo = getHoursAgo(6);
 
         // Uses .json in the path to return json and is sorted by new.
         const response = await fetch(util.format(`${process.env.SUBREDDIT_API_URL}`, subredditName), {
@@ -312,11 +312,11 @@ async function parseSubreddit(subredditName, accessToken) {
                     deal.num_comments = parseInt(dealJson.data.num_comments);
                     deal.is_hot = false;
                     if (subredditName == BAPCSALESCANADA) {
-                        deal.is_hot = deal.created > twoHoursAgo && deal.score >= 20;
+                        deal.is_hot = deal.created > sixHoursAgo && deal.score >= 20;
                     } else if (subredditName == GAMEDEALS) {
-                        deal.is_hot = deal.created > twoHoursAgo && deal.score >= 100;
+                        deal.is_hot = deal.created > sixHoursAgo && deal.score >= 100;
                     } else if (subredditName == VIDEOGAMEDEALSCANADA) {
-                        deal.is_hot = deal.created > twoHoursAgo && deal.score >= 20;
+                        deal.is_hot = deal.created > sixHoursAgo && deal.score >= 20;
                     }
 
                     deals.push(deal);
