@@ -34,12 +34,6 @@ The Discord server was created for my own personal use, which you can join if yo
 - Will mark deals as Expired / Sold Out when properly identified (ex. specific flairs from reddit)
 - Will ignore certain posts like daily/review discussion threads in /r/bapcsalescanada
 
-### Roles Assignment
-
-By default, all users will be able to see the All Deals and Hot Deals categories when they join the server.
-
- The Free Deals category is only available to those assigned to the free-deals role. To get access, you will need to go to the #roles channel and react to the appropriate emoji to get the role.
-
 ### Channels
 Each main source has two channels (All and Hot) so you can customize which ones you want to be notified by. The "All" channels will post every deal while the "Hot" channels will only post deals that reach a certain score in a given amount of time.
 
@@ -49,12 +43,18 @@ Free deals are in a separate category and are displayed differently since they a
 
 ![Screenshot of the Free Deals channels](https://i.imgur.com/bkUVHrF.png)
 
+### Roles Assignment
+
+By default, all users will be able to see the All Deals and Hot Deals categories when they join the server.
+
+ The Free Deals category is only available to those assigned to the free-deals role. To get access, you will need to go to the #roles channel and react to the appropriate emoji to get the role.
+
 ### When are deals considered hot?
 A deal turns hot once a deal reaches a minimum score within a time range. These are my own personal preferences which may change as I test it. This was done to highlight rising deals I may have ignored or missed. This isn't perfect so price errors or low stock items might not be alive long enough to hit the hot status.
-- /r/bapcsalescanada - 20+ score within 2 hours
-- /r/GameDeals - 100+ score within 2 hours
-- RedFlagDeals - 20+ score within 2 hours
-- /r/VideoGameDealsCanada - 20+ score within 2 hours
+- /r/bapcsalescanada - 20+ score within 6 hours
+- /r/GameDeals - 100+ score within 6 hours
+- RedFlagDeals - 20+ score within 6 hours
+- /r/VideoGameDealsCanada - 20+ score within 6 hours
 
 ### Update of deals
 
