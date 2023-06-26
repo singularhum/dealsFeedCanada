@@ -7,6 +7,7 @@ const EXPIRED_STATE = 'Expired';
 const SOLD_OUT_STATE = 'Sold Out';
 const UNTRACKED_STATE = 'Untracked';
 const DELETED_STATE = 'Deleted';
+const MOVED_STATE = 'Moved';
 const functions = require('firebase-functions');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
@@ -153,7 +154,11 @@ async function parseRedFlagDeals() {
                 }
 
                 if (dealJson.status === 2) {
-                    deal.tag = EXPIRED_STATE;
+                    if (dealJson.forum_id && dealJson.forum_id === 68) {
+                        deal.tag = EXPIRED_STATE;
+                    } else {
+                        deal.tag = MOVED_STATE;
+                    }
                 } else {
                     deal.tag = null;
                 }
@@ -185,7 +190,7 @@ async function parseRedFlagDeals() {
         for (const duplicateId of duplicateIds) {
             for (let i = deals.length - 1; i >= 0; i--) {
                 const deal = deals[i];
-                if (deal.id === duplicateId && deal.tag === EXPIRED_STATE) {
+                if (deal.id === duplicateId && (deal.tag === EXPIRED_STATE || deal.tag === MOVED_STATE)) {
                     functions.logger.info('Removing duplicate deal ' + deal.id);
                     deals.splice(i, 1);
                 }
@@ -359,12 +364,12 @@ async function cleanDB(deals, notificationUpdatedDeals) {
                     dbDeals.splice(i, 1);
                     functions.logger.info('Deal ' + dbDeal.id + ' successfully deleted');
 
-                    if (dbDeal.tag !== UNTRACKED_STATE && dbDeal.tag !== DELETED_STATE && dbDeal.tag !== EXPIRED_STATE && dbDeal.tag !== SOLD_OUT_STATE) {
+                    if (dbDeal.tag !== UNTRACKED_STATE && dbDeal.tag !== DELETED_STATE && dbDeal.tag !== EXPIRED_STATE && dbDeal.tag !== SOLD_OUT_STATE && dbDeal.tag !== MOVED_STATE) {
                         // Also send update notification that it is no longer tracked.
                         dbDeal.tag = UNTRACKED_STATE;
                         notificationUpdatedDeals.push(dbDeal);
                     }
-                } else if (dbDeal.tag !== UNTRACKED_STATE && dbDeal.tag !== DELETED_STATE && dbDeal.tag !== EXPIRED_STATE && dbDeal.tag !== SOLD_OUT_STATE) {
+                } else if (dbDeal.tag !== UNTRACKED_STATE && dbDeal.tag !== DELETED_STATE && dbDeal.tag !== EXPIRED_STATE && dbDeal.tag !== SOLD_OUT_STATE && dbDeal.tag !== MOVED_STATE) {
                     // Most likely the deal was deleted or could be in the next page.
                     dbDeal.date = Timestamp.fromDate(new Date());
 
@@ -446,7 +451,7 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
                     dbDeal.date = Timestamp.fromDate(new Date());
 
                     // When RFD deal is expired/moved, the score is returned as 0 so ignore that.
-                    if (dbDeal.source !== REDFLAGDEALS || dbDeal.tag !== EXPIRED_STATE) {
+                    if (dbDeal.source !== REDFLAGDEALS || (dbDeal.tag !== EXPIRED_STATE && dbDeal.tag !== MOVED_STATE)) {
                         dbDeal.score = deal.score;
                     }
 
@@ -481,7 +486,7 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
 function shouldUpdateDeal(dbDeal, deal) {
     let shouldUpdate = false;
 
-    if (deal.source === REDFLAGDEALS && deal.tag === EXPIRED_STATE && dbDeal.dealer_name) {
+    if (deal.source === REDFLAGDEALS && (deal.tag === EXPIRED_STATE || deal.tag === MOVED_STATE) && dbDeal.dealer_name) {
         deal.title = '[' + dbDeal.dealer_name + '] ' + deal.title;
     }
 
@@ -490,7 +495,7 @@ function shouldUpdateDeal(dbDeal, deal) {
         functions.logger.log('Previous deal update to title/tag: ' + dbDeal.id);
     } else {
         if (deal.score !== dbDeal.score) {
-            if (deal.source === REDFLAGDEALS && deal.tag === EXPIRED_STATE) {
+            if (deal.source === REDFLAGDEALS && (deal.tag === EXPIRED_STATE || deal.tag === MOVED_STATE)) {
                 // When RFD deal is expired/moved, the score is returned as 0 so ignore that.
                 shouldUpdate = false;
             } else {
@@ -659,7 +664,7 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
         // Embed title has a limit of 256 so trim it if it exceeds.
         let title = trimString(deal.title, 250);
         if (deal.is_hot) title = '🔥 ' + title;
-        if (deal.tag === EXPIRED_STATE || deal.tag === SOLD_OUT_STATE || deal.tag === DELETED_STATE) {
+        if (deal.tag === EXPIRED_STATE || deal.tag === SOLD_OUT_STATE || deal.tag === DELETED_STATE || deal.tag === MOVED_STATE) {
             // Strike out the title text
             title = '~~' + title + '~~';
         }
