@@ -143,6 +143,7 @@ async function parseRedFlagDeals() {
                 if (dealJson.offer && dealJson.offer.dealer_name) {
                     // Retailer is not part of the title so we must add it in.
                     deal.title = '[' + dealJson.offer.dealer_name + '] ' + deal.title;
+                    deal.dealer_name = dealJson.offer.dealer_name;
                 }
 
                 if (dealJson.votes) {
@@ -437,6 +438,9 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
                 if (shouldUpdate) {
                     // Update fields that can change and save to db.
                     dbDeal.title = deal.title;
+                    if (deal.dealer_name) {
+                        dbDeal.dealer_name = deal.dealer_name;
+                    }
                     dbDeal.tag = deal.tag;
                     dbDeal.num_comments = deal.num_comments;
                     dbDeal.date = Timestamp.fromDate(new Date());
@@ -476,6 +480,10 @@ async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
  */
 function shouldUpdateDeal(dbDeal, deal) {
     let shouldUpdate = false;
+
+    if (deal.source === REDFLAGDEALS && deal.tag === EXPIRED_STATE && dbDeal.dealer_name) {
+        deal.title = '[' + dbDeal.dealer_name + '] ' + deal.title;
+    }
 
     if (deal.title !== dbDeal.title || deal.tag != dbDeal.tag) {
         shouldUpdate = true;
