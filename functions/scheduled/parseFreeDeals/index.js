@@ -511,17 +511,23 @@ async function parseRfdFreebies(dbFreeDeals, freeDeals) {
             freebiesJson.topics.forEach((freebieJson) => {
                 const freeDeal = {};
 
-                freeDeal.id = freebieJson.topic_id.toString();
-                freeDeal.source = RFD_FREEBIES;
-                freeDeal.date = new Date();
-                freeDeal.title = freebieJson.title;
-                if (freebieJson.offer && freebieJson.offer.dealer_name) {
-                    // Retailer is not part of the title so we must add it in.
-                    freeDeal.title = '[' + freebieJson.offer.dealer_name + '] ' + freeDeal.title;
-                }
-                freeDeal.type = null;
+                const postTime = new Date(freebieJson.post_time);
+                const oneDayAgo = new Date(Date.now() - (24 * 60 * 60 * 1000));
 
-                freeDeals.push(freeDeal);
+                // Only include today's posts
+                if (postTime > oneDayAgo) {
+                    freeDeal.id = freebieJson.topic_id.toString();
+                    freeDeal.source = RFD_FREEBIES;
+                    freeDeal.date = new Date();
+                    freeDeal.title = freebieJson.title;
+                    if (freebieJson.offer && freebieJson.offer.dealer_name) {
+                        // Retailer is not part of the title so we must add it in.
+                        freeDeal.title = '[' + freebieJson.offer.dealer_name + '] ' + freeDeal.title;
+                    }
+                    freeDeal.type = null;
+
+                    freeDeals.push(freeDeal);
+                }
             });
 
             await saveDB(dbFreeDeals, freeDeals, RFD_FREEBIES);
