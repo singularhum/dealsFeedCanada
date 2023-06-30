@@ -133,25 +133,24 @@ async function parseGOG(dbFreeDeals, freeDeals) {
     try {
         functions.logger.log('Parsing GOG');
 
-        const response = await fetch(`${process.env.GOG_URL}`, {
+        const response = await fetch(`${process.env.GOG_API_URL}`, {
             method: 'get',
             signal: AbortSignal.timeout(5000),
         });
 
         if (response.ok) {
-            const $ = cheerio.load(await response.text());
+            const json = await response.json();
 
-            const giveawayElement = $('#giveaway');
-            if (giveawayElement.length === 1) {
+            json.products.forEach((gameJson) => {
                 const freeDeal = {};
-                freeDeal.id = $(giveawayElement).attr('ng-href').replace('/en/game/', '');
+                freeDeal.id = gameJson.slug.replace('-', '_');
                 freeDeal.source = GOG;
                 freeDeal.date = new Date();
-                freeDeal.title = $('div[ng-if=!giveaway.wasMarketingConsentGiven] .giveaway-banner__title').text().trim().replace('Claim ', '');
+                freeDeal.title = gameJson.title;
                 freeDeal.type = null;
-                freeDeal.expiryDate = new Date(parseInt($('.giveaway-banner__countdown-timer').attr('end-date')));
+                freeDeal.expiryDate = null;
                 freeDeals.push(freeDeal);
-            }
+            });
 
             await saveDB(dbFreeDeals, freeDeals, GOG);
         } else {
@@ -640,6 +639,27 @@ async function getExpiryDate(freeDeal) {
                     expiryDate = new Date(Date.parse(util.format('%s, %s %s %s -07:00', dayMonth, new Date().getFullYear(), timeResult[0], amPmResult[0])));
                 } else {
                     functions.logger.error('Getting expiry date failed for ' + freeDeal.id + '. Text: ' + discountExpiryText);
+                }
+            } else {
+                functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);
+            }
+        } else if (freeDeal.source === GOG) {
+            const response = await fetch(`${process.env.GOG_URL}`, {
+                method: 'get',
+                signal: AbortSignal.timeout(5000),
+            });
+
+            if (response.ok) {
+                const $ = cheerio.load(await response.text());
+
+                const giveawayElement = $('#giveaway');
+                if (giveawayElement.length === 1) {
+                    expiryDate = new Date(parseInt($('.giveaway-banner__countdown-timer').attr('end-date')));
+                } else {
+                    const countdownTimer = $('a[href=/en/game/' + freeDeal.id + '].big-spot gog-countdown-timer');
+                    if (countdownTimer.length === 1) {
+                        expiryDate = new Date($(countdownTimer).attr('end-date'));
+                    }
                 }
             } else {
                 functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);
