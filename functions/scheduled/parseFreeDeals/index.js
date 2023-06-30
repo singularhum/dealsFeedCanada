@@ -820,11 +820,7 @@ function buildLink(freeDeal) {
     } else if (freeDeal.source === FANATICAL) {
         link = util.format('https://www.fanatical.com/en/%s/%s', freeDeal.type, freeDeal.id);
     } else if (freeDeal.source === GOG) {
-        if (freeDeal.isExpired) {
-            link = util.format('https://www.gog.com/en/game/%s', freeDeal.id);
-        } else {
-            link = 'https://www.gog.com/#giveaway';
-        }
+        link = util.format('https://www.gog.com/en/game/%s', freeDeal.id);
     } else if (freeDeal.source === INDIEGALA) {
         link = util.format(`${process.env.INDIEGALA_FREEBIES_URL}` + '%s', freeDeal.id);
     } else if (freeDeal.source === PRIME_GAMING) {
