@@ -515,7 +515,7 @@ async function parseRfdFreebies(dbFreeDeals, freeDeals) {
 
                 // Only include today's posts
                 if (postTime > oneDayAgo) {
-                    freeDeal.id = freebieJson.topic_id.toString();
+                    freeDeal.id = 'rfd_' + freebieJson.topic_id.toString();
                     freeDeal.source = RFD_FREEBIES;
                     freeDeal.date = new Date();
                     freeDeal.title = freebieJson.title;
@@ -830,7 +830,7 @@ function buildLink(freeDeal) {
             link = 'https://gaming.amazon.com/home';
         }
     } else if (freeDeal.source === RFD_FREEBIES) {
-        link = util.format('https://forums.redflagdeals.com/viewtopic.php?t=%s', freeDeal.id);
+        link = util.format('https://forums.redflagdeals.com/viewtopic.php?t=%s', freeDeal.id.replace('rfd_', ''));
     } else if (freeDeal.source === STEAM) {
         link = util.format('https://store.steampowered.com/%s/%s/', freeDeal.type, freeDeal.id);
     } else if (freeDeal.source === UBISOFT) {
