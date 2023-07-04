@@ -345,6 +345,7 @@ async function parseUEMarketplace(dbFreeDeals, freeDeals) {
                     const firstWeekdayInMonth = nextMonthDate.getDay();
                     const firstTuesdayDay = 2 + ((8 - firstWeekdayInMonth) % 7);
                     const firstTuesdayOfNextMonth = new Date(nextMonthDate.getFullYear(), nextMonthDate.getMonth(), firstTuesdayDay);
+                    firstTuesdayOfNextMonth.setUTCHours(14);
                     freeDeal.expiryDate = firstTuesdayOfNextMonth;
                 } catch (e) {
                     functions.logger.error('Parsing UE Marketplace expiry date failed', e);
