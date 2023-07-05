@@ -109,7 +109,11 @@ async function parseFeed(feed, dbArticles, articles) {
 
                         const content = $(feedElement).find('content\\:encoded').text();
                         const $content = cheerio.load(content);
-                        article.thumbnail = $content('img').attr('src');
+
+                        const thumbnail = $content('img').first().attr('src');
+                        if (thumbnail) {
+                            article.thumbnail = thumbnail;
+                        }
 
                         const thumbScoreText = $($content('div')[1]).text();
                         const thumbScoreMatch = thumbScoreText.match(/[+-]\d+/);
@@ -248,8 +252,11 @@ async function sendNewToDiscord(article) {
         const embed = new EmbedBuilder()
             .setTitle(article.title)
             .setURL(article.link)
-            .setThumbnail(article.thumbnail)
             .setColor(2829617);
+
+        if (article.thumbnail) {
+            embed.setThumbnail(article.thumbnail);
+        }
 
         try {
             const unixTimestamp = Math.floor(article.posted_date.getTime() / 1000);
