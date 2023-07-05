@@ -248,12 +248,21 @@ async function sendNewToDiscord(article) {
         const embed = new EmbedBuilder()
             .setTitle(article.title)
             .setURL(article.link)
-            .setDescription(article.description)
             .setThumbnail(article.thumbnail)
             .setColor(2829617);
 
-        if (article.score) {
-            embed.setFooter({ text: util.format('%s score', article.score) });
+        try {
+            const unixTimestamp = Math.floor(article.posted_date.getTime() / 1000);
+            const formatType = 'R';
+
+            if (article.score) {
+                embed.setDescription(util.format('%s \n\n %s score · <t:%s:%s>', article.description, article.score, unixTimestamp, formatType));
+            } else {
+                embed.setDescription(util.format('%s \n\n <t:%s:%s>', article.description, unixTimestamp, formatType));
+            }
+        } catch (error) {
+            functions.logger.error('Error setting footer for ' + article.id, error);
+            embed.setDescription(article.description);
         }
 
         const channelId = getDiscordChannelId(article.source);
