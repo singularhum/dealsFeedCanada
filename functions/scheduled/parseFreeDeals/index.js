@@ -764,7 +764,7 @@ async function sendNewToDiscord(freeDeal) {
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setURL(link)
-            .setColor(2303786);
+            .setColor(2829617);
         setMessageDescriptionTimestamp(embed, freeDeal);
 
         const message = await channel.send({ embeds: [embed] });
@@ -793,7 +793,7 @@ async function sendExpiredToDiscord(freeDeal) {
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setURL(link)
-            .setColor(2303786);
+            .setColor(2829617);
         setMessageDescriptionTimestamp(embed, freeDeal);
 
         let message = await channel.messages.fetch(freeDeal.discord_message_id);

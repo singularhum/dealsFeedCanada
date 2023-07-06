@@ -683,7 +683,7 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
 
         let tag = deal.tag;
         if (tag) {
-            tag = ' | ' + tag;
+            tag = '  ·  ' + tag;
         } else {
             tag = '';
         }
@@ -692,8 +692,8 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setURL(link)
-            .setFooter({ text: util.format('%s score | %s%s', score, numComments, tag) })
-            .setColor(2303786);
+            .setFooter({ text: util.format('%s score  ·  %s%s', score, numComments, tag) })
+            .setColor(2829617);
 
         const allChannel = discordClient.channels.cache.get(allChannelId);
         const hotChannel = discordClient.channels.cache.get(hotChannelId);
