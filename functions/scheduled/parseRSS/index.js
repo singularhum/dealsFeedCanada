@@ -98,7 +98,6 @@ async function parseFeed(feed, dbArticles, articles) {
                     article.source = feed.id;
                     article.title = $(feedElement).find('title').text();
                     article.link = $(feedElement).find('link').text();
-                    article.description = $(feedElement).find('description').text();
                     article.date = new Date();
                     article.posted_date = new Date($(feedElement).find('pubDate').text());
 
@@ -263,13 +262,12 @@ async function sendNewToDiscord(article) {
             const formatType = 'R';
 
             if (article.score) {
-                embed.setDescription(util.format('%s \n\n %s score · <t:%s:%s>', article.description, article.score, unixTimestamp, formatType));
+                embed.setDescription(util.format('%s score · <t:%s:%s>', article.score, unixTimestamp, formatType));
             } else {
-                embed.setDescription(util.format('%s \n\n <t:%s:%s>', article.description, unixTimestamp, formatType));
+                embed.setDescription(util.format('<t:%s:%s>', unixTimestamp, formatType));
             }
         } catch (error) {
             functions.logger.error('Error setting footer for ' + article.id, error);
-            embed.setDescription(article.description);
         }
 
         const channelId = getDiscordChannelId(article.source);
