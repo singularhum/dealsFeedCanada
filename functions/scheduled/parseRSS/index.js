@@ -102,23 +102,7 @@ async function parseFeed(feed, dbArticles, articles) {
                     article.posted_date = new Date($(feedElement).find('pubDate').text());
 
                     if (feed.source === 'slickdeals') {
-                        const mainMatch = article.id.match(/https:\/\/slickdeals.net\/f\/\d+/);
-                        const idMatch = mainMatch[0].match(/\d{8,}/);
-                        article.id = feed.id + '-' + idMatch[0];
-
-                        const content = $(feedElement).find('content\\:encoded').text();
-                        const $content = cheerio.load(content);
-
-                        const thumbnail = $content('img').first().attr('src');
-                        if (thumbnail) {
-                            article.thumbnail = thumbnail;
-                        }
-
-                        const thumbScoreText = $($content('div')[1]).text();
-                        const thumbScoreMatch = thumbScoreText.match(/[+-]\d+/);
-                        if (thumbScoreMatch) {
-                            article.score = thumbScoreMatch[0];
-                        }
+                        parseSlickDealsCustom(feed, article, feedElement, $);
                     }
 
                     articles.push(article);
@@ -131,6 +115,65 @@ async function parseFeed(feed, dbArticles, articles) {
         }
     } catch (e) {
         functions.logger.error('Parsing Feed ' + feed.id + ' failed', e);
+    }
+}
+
+/**
+ * Sets custom properties and values for Slickdeals
+ * @param {Object} feed The feed to retrieve.
+ * @param {Object} article The current article to set.
+ * @param {Object} feedElement The feed element being parsed.
+ * @param {Object} $ Cheerio object.
+ */
+function parseSlickDealsCustom(feed, article, feedElement, $) {
+    const mainMatch = article.id.match(/https:\/\/slickdeals.net\/f\/\d+/);
+    const idMatch = mainMatch[0].match(/\d{8,}/);
+    article.id = feed.id + '-' + idMatch[0];
+
+    const content = $(feedElement).find('content\\:encoded').text();
+    const $content = cheerio.load(content);
+
+    const thumbnail = $content('img').first().attr('src');
+    if (thumbnail) {
+        article.thumbnail = thumbnail;
+    }
+
+    const divElements = $content('div');
+    for (let i = 0; i < divElements.length; i++) {
+        const thumbScoreText = $(divElements[i]).text();
+
+        if (thumbScoreText.includes('Thumb Score')) {
+            const thumbScoreMatch = thumbScoreText.match(/[+-]\d+/);
+            if (thumbScoreMatch) {
+                article.score = thumbScoreMatch[0];
+                break;
+            }
+        }
+    }
+
+    const anchorElements = $content('a');
+    if (feed.id === 'slickdeals-frontpage') {
+        for (let i = 0; i < anchorElements.length; i++) {
+            const websiteAttr = $(anchorElements[i]).attr('data-product-exitwebsite');
+            if (websiteAttr) {
+                const externalSource = $(anchorElements[i]).text();
+                if (externalSource) {
+                    article.external_source = externalSource;
+                    break;
+                }
+            }
+        }
+    } else {
+        for (let i = 0; i < anchorElements.length; i++) {
+            const storeId = $(anchorElements[i]).attr('data-store-id');
+            if (storeId) {
+                const externalSource = $(anchorElements[i]).attr('data-product-exitwebsite');
+                if (externalSource) {
+                    article.external_source = externalSource;
+                    break;
+                }
+            }
+        }
     }
 }
 
@@ -258,16 +301,15 @@ async function sendNewToDiscord(article) {
         }
 
         try {
-            const unixTimestamp = Math.floor(article.posted_date.getTime() / 1000);
-            const formatType = 'R';
-
-            if (article.score) {
-                embed.setDescription(util.format('%s score · <t:%s:%s>', article.score, unixTimestamp, formatType));
-            } else {
-                embed.setDescription(util.format('<t:%s:%s>', unixTimestamp, formatType));
+            if (article.score && article.external_source) {
+                embed.setDescription(util.format('%s score · %s', article.score, article.external_source));
+            } else if (article.score) {
+                embed.setDescription(util.format('%s score', article.score));
+            } else if (article.external_source) {
+                embed.setDescription(article.external_source);
             }
         } catch (error) {
-            functions.logger.error('Error setting footer for ' + article.id, error);
+            functions.logger.error('Error setting description for ' + article.id, error);
         }
 
         const channelId = getDiscordChannelId(article.source);
