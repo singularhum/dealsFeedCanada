@@ -91,6 +91,12 @@ You can also can also make suggestions but please note that this free server is 
 </details>
 
 <details>
+<summary>Why are there no open channels for things like discussions as a community?</summary>
+
+The main reason is that this is for my own personal use and its purpose is just to be a consolidated feed reader. Having open channels would require moderation which I'm not interested in nor finding people to do so. This could change in the future.
+</details>
+
+<details>
 <summary>Why was this created?</summary>
 
 I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking.
@@ -153,7 +159,7 @@ A deal may not be posted for various reasons either by design or an error.
 - [Cloud Firestore](https://firebase.google.com/docs/firestore) - A NoSQL database to keep track of the deals to determine which ones are new or need to be updated
 - [Cloud Scheduler](https://firebase.google.com/docs/functions/schedule-functions) - For running a scheduled cloud function in the background using Node.js
 - [Discord.js](https://discord.js.org) - For using the Discord API to send and edit messages
-- APIs from the sources (reddit & RFD) that return JSON
+- APIs from the sources that mostly return JSON
 </details>
 
 <details>
@@ -164,6 +170,7 @@ There is no cost in running the service. Firebase / Google Cloud has a free tier
 
 <details>
 <summary>What are the limitations?</summary>
+
 - The bot cannot guarantee that every deal is sent a notification and on time. Use of the various APIs may cause deals to be delayed or missed. The bot currently does not attempt to resend any that are missed.
 - There isn't much in terms of filtering specific deals you want to be notified for. For example, you can't choose to only get notified of deals with specific keywords.
 - Deals are checked at various frequencies depending on the source. This is to reduce API hits to start off as the rate limits are not documented for some APIs. Scheduled functions can also be run in shared environments which can cause a higher chance for IP bans if there are other apps doing the same thing.
