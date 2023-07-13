@@ -17,7 +17,7 @@ This was created for my own personal use and preferences but you can [join the s
 
 ## Feeds
 
-These are the main feeds the bot uses to look for deals and are located under the All Deals and Hot Deals categories of the server.
+These are the main feeds the bot uses to look for deals and are located under the All Deals and Hot Deals categories of the server. The channels under All Deals will contain every deal from the source while the Hot Deals channels will only show deals that have reached a minimum score in a given time frame.
 
 | Name | Description | Refresh Rate | Hot Deals | Source |
 | --- | --- | --- | --- | --- |
@@ -161,11 +161,11 @@ Free deals are linked directly to their product pages (except for RFD freebies).
 <summary>Why was a deal not posted?</summary>
 
 A deal may not be posted for various reasons either by design or an error.
-- The post is not considered a deal and was ignored. This includes daily/review discussion threads in /r/bapcsalescanada and posts tagged as "Question" in /r/VideoGameDealsCanada
+- The post is not considered a deal and was ignored. This includes daily/review discussion threads in /r/bapcsalescanada and posts tagged as "Question" in /r/VideoGameDealsCanada.
 - For free deals, only limited-time deals are posted. So if a game is permanently free, it will generally not be posted.
-- The API might not have included the post within the refresh cycle so you might need to wait until the next refresh
-- There was an error with the Discord API. If a message fails to send, it will not be resent
-- There was an error with the source API
+- The API might not have included the post within the refresh cycle so you might need to wait until the next refresh.
+- There was an error with the Discord API. If a message fails to send, it will not be resent.
+- There was an error with the source API.
 - The deal was posted but removed by Admins. The deal could have been a scam or not deal related.
 </details>
 
