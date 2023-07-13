@@ -53,132 +53,132 @@ These are for limited-time free deals that I usually grab from personally. This 
 ### General
 
 <details>
-    <summary>How do I join the Discord server?</summary>
+<summary>How do I join the Discord server?</summary>
 
-    You can join the Discord server using the following [invite link](https://discord.gg/wFVvfR4mGf). You must have a Discord account with a verified email to join.
+You can join the Discord server using the following [invite link](https://discord.gg/wFVvfR4mGf). You must have a Discord account with a verified email to join.
 </details>
 
 <details>
-    <summary>Do I have to pay anything to use the Discord server?</summary>
-    
-    No, the server is provided for free. There are no ads, affiliate links or any Discord features enabled that would generate money to me.
+<summary>Do I have to pay anything to use the Discord server?</summary>
+
+No, the server is provided for free. There are no ads, affiliate links or any Discord features enabled that would generate money to me.
 </details>
 
 <details>
-    <summary>How do I change my Discord notification settings?</summary>
-    
-    Please refer to https://support.discord.com/hc/en-us/articles/215253258-Notifications-Settings-101
+<summary>How do I change my Discord notification settings?</summary>
+
+Please refer to https://support.discord.com/hc/en-us/articles/215253258-Notifications-Settings-101
 </details>
 
 <details>
-    <summary>Why do I not see specific channels?</summary>
-    
-    Some channels are hidden by default and you need grant yourself access to it. Go to the #roles channel in the server to get access.
+<summary>Why do I not see specific channels?</summary>
+
+Some channels are hidden by default and you need grant yourself access to it. Go to the #roles channel in the server to get access.
 </details>
 
 <details>
-    <summary>How do I assign or unassign a role to myself?</summary>
-    
-    You assign or unassign your role in the #roles channel by reacting or unreacting to the message. This currently uses the YAGPDB.xyz bot to handle the role assignments.
+<summary>How do I assign or unassign a role to myself?</summary>
+
+You assign or unassign your role in the #roles channel by reacting or unreacting to the message. This currently uses the YAGPDB.xyz bot to handle the role assignments.
 </details>
 
 <details>
-    <summary>Where do I report an issue or make a suggestion?</summary>
-    
-    Since the server has no open channels, you can DM directly on Discord or post in the Issues section of this GitHub project for any problems.
-    
-    You can also can also make suggestions but please note that this free server is for my own preferences so I may not do them.
+<summary>Where do I report an issue or make a suggestion?</summary>
+
+Since the server has no open channels, you can DM directly on Discord or post in the Issues section of this GitHub project for any problems.
+
+You can also can also make suggestions but please note that this free server is for my own preferences so I may not do them.
 </details>
 
 <details>
-    <summary>Why was this created?</summary>
+<summary>Why was this created?</summary>
 
-    I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking.
+I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking.
 
-    I also wanted to learn about Firebase Cloud Messaging (FCM) but although it works well, I ended up using Discord so I don't have to create web, desktop and mobile apps to receive the notifications.
+I also wanted to learn about Firebase Cloud Messaging (FCM) but although it works well, I ended up using Discord so I don't have to create web, desktop and mobile apps to receive the notifications.
 </details>
 
 ### Deals
 
 <details>
-    <summary>When are deals considered hot?</summary>
-    
-    A deal turns hot once a deal reaches a minimum score within a time range. These are my own personal preferences which may change as I test it. This was done to highlight rising deals I may have ignored or missed. This isn't perfect so price errors or low stock items might not be alive long enough to hit the hot status.
-    - /r/bapcsalescanada - 20+ score within 6 hours
-    - /r/GameDeals - 100+ score within 6 hours
-    - RedFlagDeals - 20+ score within 6 hours
-    - /r/VideoGameDealsCanada - 20+ score within 6 hours
+<summary>When are deals considered hot?</summary>
+
+A deal turns hot once a deal reaches a minimum score within a time range. These are my own personal preferences which may change as I test it. This was done to highlight rising deals I may have ignored or missed. This isn't perfect so price errors or low stock items might not be alive long enough to hit the hot status.
+- /r/bapcsalescanada - 20+ score within 6 hours
+- /r/GameDeals - 100+ score within 6 hours
+- RedFlagDeals - 20+ score within 6 hours
+- /r/VideoGameDealsCanada - 20+ score within 6 hours
 </details>
 
 <details>
-    <summary>When are deals updated?</summary>
-    
-    The bot displays the score, number of comments and a flair for each deal which need to be updated as time moves forward. However, due to rate limits with the Discord API the bot may only update certain deals occassionally based on various conditions. The updates should still happen frequently enough that it will give a good idea of the current state of the deal.
+<summary>When are deals updated?</summary>
 
-    - A deal will be updated when:
-        - turning hot
-        - the title, flair or status (expired/deleted) changes
-        - the score changes a certain amount
-        - the number of comments changes a certain amount
-    - A deal will not be updated when:
-        - it is not in the current list of the latest deals (only the first page of each source is checked, so around 25-30 deals) and will be identified as "Untracked"
-        - an update limit has been reached
+The bot displays the score, number of comments and a flair for each deal which need to be updated as time moves forward. However, due to rate limits with the Discord API the bot may only update certain deals occassionally based on various conditions. The updates should still happen frequently enough that it will give a good idea of the current state of the deal.
+
+- A deal will be updated when:
+    - turning hot
+    - the title, flair or status (expired/deleted) changes
+    - the score changes a certain amount
+    - the number of comments changes a certain amount
+- A deal will not be updated when:
+    - it is not in the current list of the latest deals (only the first page of each source is checked, so around 25-30 deals) and will be identified as "Untracked"
+    - an update limit has been reached
 </details>
 
 <details>
-    <summary>How are deals linked?</summary>
-    
-    Deals posted under All and Hot are linked to their originating source (Reddit & RFD) and not directly to any products/services. Always be aware of scams as some posts might be detected before they are deleted by moderators. 
+<summary>How are deals linked?</summary>
 
-    Free deals are linked directly to their product pages (except for RFD freebies). No affiliate links are used.
+Deals posted under All and Hot are linked to their originating source (Reddit & RFD) and not directly to any products/services. Always be aware of scams as some posts might be detected before they are deleted by moderators. 
+
+Free deals are linked directly to their product pages (except for RFD freebies). No affiliate links are used.
 </details>
 
 <details>
-    <summary>Why was a deal not posted?</summary>
-    
-    A deal may not be posted for various reasons either by design or an error.
-    - The post is not considered a deal and was ignored. This includes daily/review discussion threads in /r/bapcsalescanada and posts tagged as "Question" in /r/VideoGameDealsCanada
-    - The API might not have included the post within the refresh cycle so you might need to wait until the next refresh
-    - There was an error with the Discord API. If a message fails to send, it will not be resent
-    - There was an error with the source API
-    - The deal was posted but removed by Admins. The deal could have been a scam or not deal related.
+<summary>Why was a deal not posted?</summary>
+
+A deal may not be posted for various reasons either by design or an error.
+- The post is not considered a deal and was ignored. This includes daily/review discussion threads in /r/bapcsalescanada and posts tagged as "Question" in /r/VideoGameDealsCanada
+- The API might not have included the post within the refresh cycle so you might need to wait until the next refresh
+- There was an error with the Discord API. If a message fails to send, it will not be resent
+- There was an error with the source API
+- The deal was posted but removed by Admins. The deal could have been a scam or not deal related.
 </details>
 
 ### Technical
 
 <details>
-    <summary>Which services and tools are used?</summary>
-    
-    - Firebase / Google Cloud
-    - [Cloud Firestore](https://firebase.google.com/docs/firestore) - A NoSQL database to keep track of the deals to determine which ones are new or need to be updated
-    - [Cloud Scheduler](https://firebase.google.com/docs/functions/schedule-functions) - For running a scheduled cloud function in the background using Node.js
-    - [Discord.js](https://discord.js.org) - For using the Discord API to send and edit messages
-    - APIs from the sources (reddit & RFD) that return JSON
+<summary>Which services and tools are used?</summary>
+
+- Firebase / Google Cloud
+- [Cloud Firestore](https://firebase.google.com/docs/firestore) - A NoSQL database to keep track of the deals to determine which ones are new or need to be updated
+- [Cloud Scheduler](https://firebase.google.com/docs/functions/schedule-functions) - For running a scheduled cloud function in the background using Node.js
+- [Discord.js](https://discord.js.org) - For using the Discord API to send and edit messages
+- APIs from the sources (reddit & RFD) that return JSON
 </details>
 
 <details>
-    <summary>Is there any cost in running the bot/server?</summary>
+<summary>Is there any cost in running the bot/server?</summary>
 
-    There is no cost in running the service. Firebase / Google Cloud has a free tier in the Blaze plan as long as you do not exceed any quotas. The scheduled function has various limits in place to try to reduce excessive use which does introduce some limitations.
+There is no cost in running the service. Firebase / Google Cloud has a free tier in the Blaze plan as long as you do not exceed any quotas. The scheduled function has various limits in place to try to reduce excessive use which does introduce some limitations.
 </details>
 
 <details>
-    <summary>What are the limitations?</summary>
-     - The bot cannot guarantee that every deal is sent a notification and on time. Use of the various APIs may cause deals to be delayed or missed. The bot currently does not attempt to resend any that are missed.
-    - There isn't much in terms of filtering specific deals you want to be notified for. For example, you can't choose to only get notified of deals with specific keywords.
-    - Deals are checked at various frequencies depending on the source. This is to reduce API hits to start off as the rate limits are not documented for some APIs. Scheduled functions can also be run in shared environments which can cause a higher chance for IP bans if there are other apps doing the same thing.
-    - Only the first page (25-30 deals) of each source is loaded which is also done to reduce API load and keep database size smaller. This in general is fine for detecting new deals (>30 deals posted within 5 mins would be rare) but this does impact editing of messages. Deals that fall off into the second page will no longer be updated (score and number of comments). Not a huge issue as these numbers are just to give a general idea of activity and not to be exact.
-    - The Discord API has dynamic rate limits in place and it is not generous for editing of messages. Editing just 15-20 messages at a time can cause the function to timeout (currently set to 40 seconds). Discord.js queues and waits on API calls once it detects the rate limit has been reached. Editing of messages isn't too important so there is logic in place to only update deals when the score or number of comments have changed a certain amount.
+<summary>What are the limitations?</summary>
+- The bot cannot guarantee that every deal is sent a notification and on time. Use of the various APIs may cause deals to be delayed or missed. The bot currently does not attempt to resend any that are missed.
+- There isn't much in terms of filtering specific deals you want to be notified for. For example, you can't choose to only get notified of deals with specific keywords.
+- Deals are checked at various frequencies depending on the source. This is to reduce API hits to start off as the rate limits are not documented for some APIs. Scheduled functions can also be run in shared environments which can cause a higher chance for IP bans if there are other apps doing the same thing.
+- Only the first page (25-30 deals) of each source is loaded which is also done to reduce API load and keep database size smaller. This in general is fine for detecting new deals (>30 deals posted within 5 mins would be rare) but this does impact editing of messages. Deals that fall off into the second page will no longer be updated (score and number of comments). Not a huge issue as these numbers are just to give a general idea of activity and not to be exact.
+- The Discord API has dynamic rate limits in place and it is not generous for editing of messages. Editing just 15-20 messages at a time can cause the function to timeout (currently set to 40 seconds). Discord.js queues and waits on API calls once it detects the rate limit has been reached. Editing of messages isn't too important so there is logic in place to only update deals when the score or number of comments have changed a certain amount.
 </details>
 
 <details>
-    <summary>How can I use the code for the bot?</summary>
-    
-    This repository is provided to show how the Discord bot works and is not set up in an easy way to clone and run it right away. You will need to setup a Firebase project on the Blaze plan and configure a Discord server if you want to run it yourself.
+<summary>How can I use the code for the bot?</summary>
 
-    The URLs of the API calls are also not included in the repository.
+This repository is provided to show how the Discord bot works and is not set up in an easy way to clone and run it right away. You will need to setup a Firebase project on the Blaze plan and configure a Discord server if you want to run it yourself.
 
-    You are free to take and modify the code for your own uses. This was only a small side project that doesn't do anything too special.
+The URLs of the API calls are also not included in the repository.
+
+You are free to take and modify the code for your own uses. This was only a small side project that doesn't do anything too special.
 </details>
 
 ### Resources
