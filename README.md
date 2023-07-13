@@ -9,7 +9,7 @@ This was created for my own personal use and preferences but you can [join the s
 ## Features
 
 - Posts new deals that are detected every 1-2 mins for Reddit sources, 5 mins for RFD and 30 mins for free deals
-- Use Discord notifications to get notified of new deals and/or use the server as a consolidated feed reader
+- Use Discord notifications to get notified of new deals and/or use the server as a consolidated feeds reader
 - Displays and occassionaly updates the score/upvotes, number of comments and flair/status of each deal when available
 - Posts seperate notifications when deals turn hot (reaches a minimum score in a given time frame)
 - Marks deals as Expired / Sold Out when properly identified (ex. specific flairs from Reddit)
@@ -77,34 +77,52 @@ Some channels are hidden by default and you need grant yourself access to it. Go
 </details>
 
 <details>
-<summary>How do I assign or unassign a role to myself?</summary>
+<summary>What are roles and how do I assign or unassign a role to myself?</summary>
 
-You assign or unassign your role in the #roles channel by reacting or unreacting to the message. This currently uses the YAGPDB.xyz bot to handle the role assignments.
+Roles are used in this server to control which channels you have access to. You assign or unassign your roles in the #roles channel by reacting (assign) or unreacting (unassign) to a specific emoji. This currently uses the YAGPDB.xyz bot to handle the role assignments.
+</details>
+
+<details>
+<summary>The roles assignment is not working?</summary>
+
+The roles assignment uses the YAGPDB.xyz bot so if it is offline it will not work. Otherwise, you can try reacting and unreacting a few times to reset your role.
 </details>
 
 <details>
 <summary>Where do I report an issue or make a suggestion?</summary>
 
-Since the server has no open channels, you can DM directly on Discord or post in the Issues section of this GitHub project for any problems.
+Since the server has no open channels, you can post in the Issues section of this GitHub project for any problems or send a direct message to me on Discord.
 
-You can also can also make suggestions but please note that this free server is for my own preferences so I may not do them.
+You can also can also make suggestions but please note that this free server is for my own preferences so I may not action them.
 </details>
 
 <details>
 <summary>Why are there no open channels for things like discussions as a community?</summary>
 
-The main reason is that this is for my own personal use and its purpose is just to be a consolidated feed reader. Having open channels would require moderation which I'm not interested in nor finding people to do so. This could change in the future.
+The main reason is that this is for my own personal use and its purpose is just to be a consolidated feeds reader. Having open channels would require moderation which I'm not interested in nor finding people to do so. This could change in the future.
 </details>
 
 <details>
 <summary>Why was this created?</summary>
 
-I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking.
+I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking. So with this server I can keep up-to-date on all deals I care about without having to individually visit each source website.
 
 I also wanted to learn about Firebase Cloud Messaging (FCM) but although it works well, I ended up using Discord so I don't have to create web, desktop and mobile apps to receive the notifications.
 </details>
 
 ### Deals
+<details>
+<summary>What are the different statuses for deals?</summary>
+
+Statuses are used to identify the state of deals and this only applies to All Deals and Hot Deals channels:
+- (None) - When nothing is shown in the footer of the deal means the deal is still active according to its source post
+- Expired - The deal has been marked as Expired in the source post. The title will also be striked out.
+- Sold Out - Same as Expired. This is sometimes used by some posts in /r/bapcsalescanada.
+- Untracked - This means the deal is no longer tracked and will not be updated anymore. The bot only keeps track of the first page of the latest deals.
+- Deleted - The originating deal was deleted, either by the original poster or by moderators.
+- Moved - This is specific to RedFlagDeals. Sometimes posts are moved to a different sub-forum when they don't belong in the Hot Deals forum.
+- (Other) - When anything else is shown, this is the flair applied to the post on Reddit usually containing additional info about the deal.
+</details>
 
 <details>
 <summary>When are deals considered hot?</summary>
@@ -144,6 +162,7 @@ Free deals are linked directly to their product pages (except for RFD freebies).
 
 A deal may not be posted for various reasons either by design or an error.
 - The post is not considered a deal and was ignored. This includes daily/review discussion threads in /r/bapcsalescanada and posts tagged as "Question" in /r/VideoGameDealsCanada
+- For free deals, only limited-time deals are posted. So if a game is permanently free, it will generally not be posted.
 - The API might not have included the post within the refresh cycle so you might need to wait until the next refresh
 - There was an error with the Discord API. If a message fails to send, it will not be resent
 - There was an error with the source API
@@ -188,7 +207,7 @@ The URLs of the API calls are also not included in the repository.
 You are free to take and modify the code for your own uses. This was only a small side project that doesn't do anything too special.
 </details>
 
-### Resources
+## Resources
 - [Firebase Pricing](https://firebase.google.com/pricing) (Blaze Plan is used for Cloud Functions)
 - [Firebase Projects](https://firebase.google.com/docs/projects/learn-more)
 - [Firebase Admin](https://firebase.google.com/docs/admin/setup)
