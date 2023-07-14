@@ -48,6 +48,18 @@ These are for limited-time free deals that I usually grab from personally. This 
 
 ![Screenshot of the free deals Discord channels](https://i.imgur.com/WUCaWny.png)
 
+### Other Feeds
+
+This category in the server will contain feeds that are not related to Canadian-based deals. This can be useful for those of you that visit or have friends/family in other countries.
+
+These feeds are only visible if you opt-in. Head over to the #roles channel to get access.
+
+ Name | Location | Description | Refresh Rate | Source |
+| --- | --- | --- | --- | --- |
+| [OzBargain](https://www.ozbargain.com.au/deals) | Australia | A popular community driven website in Australia for deals. All deals are posted. | 5 mins | OzBargain RSS |
+| [Slickdeals Rising](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | A hot deals forum for the US. Since many deals are posted, this feed will only post deals that have reached a minimum of 5 upvotes. | 5 mins | Slickdeals RSS |
+| [Slickdeals Hot](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | The same as Slickdeals Rising but will only post deals with a minimum of 15 votes. | 5 mins | Slickdeals RSS |
+
 ## Frequently Asked Questions (FAQ)
 
 ### General
