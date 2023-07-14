@@ -107,7 +107,7 @@ The roles assignment uses the YAGPDB.xyz bot so if it is offline it will not wor
 
 Since the server has no open channels, you can submit a report in the Issues section of this GitHub project or you can send me a direct message on Discord.
 
-You can also can also make suggestions but please note that this free server is for my own preferences so I may not action them.
+You can also make suggestions but please note that this free server is for my own preferences so I may not action them.
 </details>
 
 <details>
