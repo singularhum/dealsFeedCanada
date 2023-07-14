@@ -203,14 +203,15 @@ async function saveDB(feed, dbArticles, articles) {
         }
     }
 
+    const twoDaysAgo = getDaysAgo(2);
     for (let i = dbArticles.length - 1; i >= 0; i--) {
         try {
             const dbArticle = dbArticles[i];
             if (dbArticle.source === feed.id) {
                 const foundArticle = articles.find((article) => article.id === dbArticle.id);
 
-                if (!foundArticle) {
-                    // Delete from DB and remove from array.
+                if (!foundArticle && dbArticle.posted_date < twoDaysAgo) {
+                    // Delete from DB if over two days old and remove from array.
                     await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(dbArticle.id).delete();
                     dbArticles.splice(i, 1);
                     functions.logger.info('Article ' + dbArticle.id + ' removed from DB');
@@ -344,4 +345,13 @@ function getDiscordChannelId(source) {
     } else {
         return channelId;
     }
+}
+
+/**
+ * Gets a date x number of days ago.
+ * @param {int} i The number of days.
+ * @return {Date} Returns a date based on the number of days supplied.
+ */
+function getDaysAgo(i) {
+    return new Date(Date.now() - (i * 24 * 60 * 60 * 1000));
 }
