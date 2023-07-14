@@ -32,7 +32,9 @@ exports.parseRSS = functions.runWith({ maxInstances: 1, timeoutSeconds: 60 }).pu
     const articles = [];
 
     for (const feed of _dbFeeds) {
-        await parseFeed(feed, _dbArticles, articles);
+        if (feed.enabled) {
+            await parseFeed(feed, _dbArticles, articles);
+        }
     }
 
     await sendNotifications(articles);
