@@ -30,14 +30,16 @@ exports.parseRSS = functions.runWith({ maxInstances: 1, timeoutSeconds: 60 }).pu
     if (!_dbArticles) _dbArticles = await fetchDB(RSS_ARTICLES_DB_COLLECTION);
 
     const articles = [];
+    const newArticles = [];
+    const updateArticles = [];
 
     for (const feed of _dbFeeds) {
         if (feed.enabled) {
-            await parseFeed(feed, _dbArticles, articles);
+            await parseFeed(feed, _dbArticles, articles, newArticles, updateArticles);
         }
     }
 
-    await sendNotifications(articles);
+    await sendNotifications(newArticles, updateArticles);
 
     functions.logger.log('Scheduled Job Completed');
 
@@ -78,8 +80,10 @@ async function fetchDB(name) {
  * @param {Object} feed The feed to retrieve.
  * @param {Array} dbArticles An array of the articles in the DB.
  * @param {Array} articles An array of the articles being parsed.
+ * @param {Array} newArticles An array of the new articles being parsed.
+ * @param {Array} updateArticles An array of the articles to be update being parsed.
  */
-async function parseFeed(feed, dbArticles, articles) {
+async function parseFeed(feed, dbArticles, articles, newArticles, updateArticles) {
     try {
         functions.logger.log('Parsing Feed ' + feed.id);
 
@@ -103,6 +107,9 @@ async function parseFeed(feed, dbArticles, articles) {
                     article.link = $(feedElement).find('link').text();
                     article.date = new Date();
                     article.posted_date = new Date($(feedElement).find('pubDate').text());
+                    article.thumbnail = null;
+                    article.score = null;
+                    article.external_source = null;
 
                     if (feed.source === 'slickdeals') {
                         parseSlickDealsCustom(feed, article, feedElement, $);
@@ -113,7 +120,7 @@ async function parseFeed(feed, dbArticles, articles) {
                     articles.push(article);
                 });
 
-                await saveDB(feed, dbArticles, articles);
+                await saveDB(feed, dbArticles, articles, newArticles, updateArticles);
             }
         } else {
             functions.logger.error('Parsing Feed ' + feed.id + ' failed', response);
@@ -150,7 +157,7 @@ function parseSlickDealsCustom(feed, article, feedElement, $) {
         if (thumbScoreText.includes('Thumb Score')) {
             const thumbScoreMatch = thumbScoreText.match(/[+-]\d+/);
             if (thumbScoreMatch) {
-                article.score = thumbScoreMatch[0];
+                article.score = thumbScoreMatch[0].replace('+', '');
                 break;
             }
         }
@@ -205,8 +212,10 @@ function parseOzBargainCustom(feed, article, feedElement, $) {
  * @param {string} feed The originating feed.
  * @param {Array} dbArticles An array of the articles in the DB.
  * @param {Array} articles The articles parsed.
+ * @param {Array} newArticles An array of the new articles being parsed.
+ * @param {Array} updateArticles An array of the articles to be update being parsed.
  */
-async function saveDB(feed, dbArticles, articles) {
+async function saveDB(feed, dbArticles, articles, newArticles, updateArticles) {
     for (const article of articles) {
         try {
             if (article.source === feed.id) {
@@ -214,11 +223,41 @@ async function saveDB(feed, dbArticles, articles) {
 
                 if (!dbArticle) {
                     functions.logger.log('New article: ' + article.id);
-                    dbArticles.push(article);
-
-                    // Save to DB and set as isNew for notifications.
                     await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(article.id).set(article);
-                    article.isNew = true;
+                    dbArticles.push(article);
+                    newArticles.push(article);
+                } else if (updateArticles.length < 10) {
+                    // Deal was found so check if we should update it.
+                    let shouldUpdate = dbArticle.title != article.title || dbArticle.link != article.link || dbArticle.thumbnail != article.thumbnail ||
+                        dbArticle.external_source != article.external_source;
+
+                    if (!shouldUpdate && article.score) {
+                        const difference = Math.abs(dbArticle.score - article.score);
+                        if (article.score >= 200 || article.score <= -200) {
+                            shouldUpdate = difference >= 50;
+                        } else if (article.score >= 100 || article.score <= -100) {
+                            shouldUpdate = difference >= 20;
+                        } else if (article.score >= 20 || article.score <= -20) {
+                            shouldUpdate = difference >= 10;
+                        } else if (article.score >= 10 || article.score <= -10) {
+                            shouldUpdate = difference >= 5;
+                        } else if (article.score > 2 || article.score < -2) {
+                            shouldUpdate = difference >= 3;
+                        } else {
+                            shouldUpdate = difference >= 2;
+                        }
+                    }
+
+                    if (shouldUpdate) {
+                        dbArticle.title = article.title;
+                        dbArticle.link = article.link;
+                        dbArticle.thumbnail = article.thumbnail;
+                        dbArticle.external_source = article.external_source;
+                        dbArticle.score = article.score;
+                        await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(dbArticle.id).set(dbArticle);
+                        updateArticles.push(dbArticle);
+                        functions.logger.log('Updated article: ' + article.id);
+                    }
                 }
             }
         } catch (error) {
@@ -248,24 +287,11 @@ async function saveDB(feed, dbArticles, articles) {
 
 /**
  * Sends notifications for the new articles.
- * @param {Array} articles An array with the current articles.
+ * @param {Array} newArticles An array of the new articles being parsed.
+ * @param {Array} updateArticles An array of the articles to be update being parsed.
  */
-async function sendNotifications(articles) {
-    const newArticles = [];
-
-    for (let i = articles.length - 1; i >= 0; i--) {
-        try {
-            const article = articles[i];
-
-            if (article.isNew) {
-                newArticles.push(article);
-            }
-        } catch (error) {
-            functions.logger.error('Error loading notifications', error);
-        }
-    }
-
-    if (newArticles.length > 0) {
+async function sendNotifications(newArticles, updateArticles) {
+    if (newArticles.length > 0 || updateArticles.length > 0) {
         let discordAvailable = false;
 
         try {
@@ -293,16 +319,23 @@ async function sendNotifications(articles) {
         }
 
         if (discordAvailable) {
-            for (const newArticle of newArticles) {
+            for (let i = newArticles.length - 1; i >= 0; i--) {
                 try {
-                    await sendNewToDiscord(newArticle);
+                    await sendNewToDiscord(newArticles[i]);
 
                     // Wait a bit after each call for rate limit prevention.
                     await setTimeout(1000);
                 } catch (error) {
-                    functions.logger.error('Error sending new notification for ' + newArticle.id, error);
+                    functions.logger.error('Error sending new notification for ' + newArticles[i].id, error);
                 }
             }
+
+            // Send out the updated notifications. Use Promise.all and let Discord.js handle rate limits with the updates.
+            const promises = [];
+            for (const updateArticle of updateArticles) {
+                promises.push(sendUpdateToDiscord(updateArticle));
+            }
+            await Promise.all(promises);
         }
     }
 }
@@ -315,27 +348,7 @@ async function sendNewToDiscord(article) {
     try {
         functions.logger.log('Discord - Sending ' + article.id);
 
-        const embed = new EmbedBuilder()
-            .setTitle(article.title)
-            .setURL(article.link)
-            .setColor(2829617);
-
-        if (article.thumbnail) {
-            embed.setThumbnail(article.thumbnail);
-        }
-
-        try {
-            if (article.score && article.external_source) {
-                embed.setDescription(util.format('%s score · %s', article.score, article.external_source));
-            } else if (article.score) {
-                embed.setDescription(util.format('%s score', article.score));
-            } else if (article.external_source) {
-                embed.setDescription(article.external_source);
-            }
-        } catch (error) {
-            functions.logger.error('Error setting description for ' + article.id, error);
-        }
-
+        const embed = createEmbed(article);
         const channelId = getDiscordChannelId(article.source);
         const channel = discordClient.channels.cache.get(channelId);
 
@@ -347,6 +360,69 @@ async function sendNewToDiscord(article) {
     } catch (error) {
         functions.logger.error('Discord - Error sending ' + article.id, error);
     }
+}
+
+/**
+ * Updates the article message in Discord using the API.
+ * @param {Object} article The article to update.
+ */
+async function sendUpdateToDiscord(article) {
+    try {
+        if (article.discord_message_id) {
+            functions.logger.log('Discord - Updating ' + article.id);
+
+            const embed = createEmbed(article);
+            const channelId = getDiscordChannelId(article.source);
+            const channel = discordClient.channels.cache.get(channelId);
+
+            let message = await channel.messages.fetch(article.discord_message_id);
+            if (message) {
+                message = await message.edit({ embeds: [embed] });
+                functions.logger.log('Discord - ' + article.id + ' has been updated');
+            } else {
+                functions.logger.warn('Discord - ' + article.id + ' was not found');
+            }
+        } else {
+            functions.logger.warn('Discord - ' + article.id + ' does not have a message id');
+        }
+    } catch (error) {
+        functions.logger.error('Discord - Error sending ' + article.id, error);
+    }
+}
+
+/**
+ * Creates the embed to send to Discord.
+ * @param {string} article The article to build the embed for.
+ * @return {EmbedBuilder} The embed to send to Discord.
+ */
+function createEmbed(article) {
+    const embed = new EmbedBuilder()
+        .setTitle(article.title)
+        .setURL(article.link)
+        .setColor(2829617);
+
+    if (article.thumbnail) {
+        embed.setThumbnail(article.thumbnail);
+    }
+
+    try {
+        let scoreFormat = null;
+        if (article.score != null && article.score >= 0) {
+            scoreFormat = '+' + article.score;
+        }
+
+        if (article.score != null && article.external_source) {
+            embed.setDescription(util.format('%s score · %s', scoreFormat, article.external_source));
+        } else if (article.score) {
+            embed.setDescription(util.format('%s score', scoreFormat));
+        } else if (article.external_source) {
+            embed.setDescription(article.external_source);
+        }
+    } catch (error) {
+        functions.logger.error('Error setting description for ' + article.id, error);
+    }
+
+    return embed;
 }
 
 /**
