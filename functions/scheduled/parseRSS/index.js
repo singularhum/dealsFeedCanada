@@ -7,6 +7,7 @@ const { setTimeout } = require('timers/promises');
 const { Client, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const cheerio = require('cheerio');
 const util = require('util');
+const { URL } = require('url');
 
 // Initialize firebase
 initializeApp();
@@ -103,6 +104,8 @@ async function parseFeed(feed, dbArticles, articles) {
 
                     if (feed.source === 'slickdeals') {
                         parseSlickDealsCustom(feed, article, feedElement, $);
+                    } else if (feed.source === 'ozbargain') {
+                        parseOzBargainCustom(feed, article, feedElement, $);
                     }
 
                     articles.push(article);
@@ -152,28 +155,46 @@ function parseSlickDealsCustom(feed, article, feedElement, $) {
     }
 
     const anchorElements = $content('a');
-    if (feed.id === 'slickdeals-frontpage') {
-        for (let i = 0; i < anchorElements.length; i++) {
-            const websiteAttr = $(anchorElements[i]).attr('data-product-exitwebsite');
-            if (websiteAttr) {
-                const externalSource = $(anchorElements[i]).text();
-                if (externalSource) {
-                    article.external_source = externalSource;
-                    break;
-                }
+    for (let i = 0; i < anchorElements.length; i++) {
+        const storeId = $(anchorElements[i]).attr('data-store-id');
+        if (storeId) {
+            const externalSource = $(anchorElements[i]).attr('data-product-exitwebsite');
+            if (externalSource) {
+                article.external_source = externalSource;
+                break;
             }
         }
-    } else {
-        for (let i = 0; i < anchorElements.length; i++) {
-            const storeId = $(anchorElements[i]).attr('data-store-id');
-            if (storeId) {
-                const externalSource = $(anchorElements[i]).attr('data-product-exitwebsite');
-                if (externalSource) {
-                    article.external_source = externalSource;
-                    break;
-                }
-            }
-        }
+    }
+}
+
+/**
+ * Sets custom properties and values for OzBargain.
+ * @param {Object} feed The feed to retrieve.
+ * @param {Object} article The current article to set.
+ * @param {Object} feedElement The feed element being parsed.
+ * @param {Object} $ Cheerio object.
+ */
+function parseOzBargainCustom(feed, article, feedElement, $) {
+    const idMatch = article.id.match(/\d{6,}/);
+    article.id = feed.id + '-' + idMatch[0];
+
+    const thumbnail = $(feedElement).find('media\\:thumbnail').attr('url');
+    if (thumbnail) {
+        article.thumbnail = thumbnail;
+    }
+
+    const metaElement = $(feedElement).find('ozb\\:meta');
+    const upvotes = $(metaElement).attr('votes-pos');
+    const downvotes = $(metaElement).attr('votes-neg');
+    const url = $(metaElement).attr('url');
+
+    if (upvotes && downvotes) {
+        article.score = parseInt(upvotes) - parseInt(downvotes);
+    }
+
+    if (url) {
+        const urlObject = new URL(url);
+        article.external_source = urlObject.hostname.replace('www.', '');
     }
 }
 
