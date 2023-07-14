@@ -11,7 +11,7 @@ This was created for my own personal use and preferences but you can [join the s
 - Posts new deals that are detected every 1-2 mins for Reddit sources, 5 mins for RFD and 30 mins for free deals
 - Use Discord notifications to get notified of new deals and/or use the server as a consolidated feeds reader
 - Displays and occasionally updates the score/upvotes, number of comments and flair/status of each deal when available
-- Posts seperate notifications when deals turn hot (reaches a minimum score in a given time frame)
+- Posts separate notifications when deals turn hot (reaches a minimum score in a given time frame)
 - Marks deals as Expired / Sold Out when properly identified (ex. specific flairs from Reddit)
 - Ignores certain non-deal posts like daily/review discussion threads in /r/bapcsalescanada
 
@@ -93,19 +93,19 @@ Please refer to https://support.discord.com/hc/en-us/articles/215253258-Notifica
 <details>
 <summary>Why do I not see specific channels?</summary>
 
-Some channels are hidden by default and you need grant yourself access to it. Go to the #roles channel in the server to get access.
+Some channels are hidden by default and you need to grant yourself access to it. Go to the #roles channel in the server to get access.
 </details>
 
 <details>
 <summary>What are roles and how do I assign or unassign a role to myself?</summary>
 
-Roles are used in this server to control which channels you have access to. You assign or unassign your roles in the #roles channel by reacting (assign) or unreacting (unassign) to a specific emoji. This currently uses the YAGPDB.xyz bot to handle the role assignments.
+Roles are used in this server to control which channels you have access to. You assign or unassign your roles in the #roles channel by reacting (assign) or unreacting (unassign) to a specific emoji. Role assignments are currently handled by the [YAGPDB.xyz](https://yagpdb.xyz/) bot.
 </details>
 
 <details>
 <summary>The roles assignment is not working?</summary>
 
-The roles assignment uses the YAGPDB.xyz bot so if it is offline it will not work. Otherwise, you can try reacting and unreacting a few times to reset your role.
+The roles assignment uses the YAGPDB.xyz bot so if it is offline it will not work. Otherwise, you can try reacting and unreacting or vice versa to reset your role.
 </details>
 
 <details>
@@ -125,7 +125,7 @@ The main reason is that this is for my own personal use and its purpose is just 
 <details>
 <summary>Why was this created?</summary>
 
-I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking. So with this server I can keep up-to-date on all deals I care about without having to individually visit each source website.
+I wanted a way to view and get notified of deals from various Canadian sources in a single location. I've used services like IFTTT, Feedly and various Discord servers. They can have inconsistent delays in notifying and I cannot customize them enough to my own liking.
 
 I also wanted to learn about Firebase Cloud Messaging (FCM) but although it works well, I ended up using Discord so I don't have to create web, desktop and mobile apps to receive the notifications.
 </details>
@@ -157,7 +157,7 @@ A deal turns hot once a deal reaches a minimum score within a time range. These 
 <details>
 <summary>When are deals updated?</summary>
 
-The bot displays the score, number of comments and a flair for each deal which need to be updated as time moves forward. However, due to rate limits with the Discord API the bot may only update certain deals occassionally based on various conditions. The updates should still happen frequently enough that it will give a good idea of the current state of the deal.
+The bot displays the score, number of comments and a flair for each deal which need to be updated as time moves forward. However, due to rate limits with the Discord API the bot may only update certain deals occasionally based on various conditions. The updates should still happen frequently enough that it will give a good idea of the current state of the deal.
 
 - A deal will be updated when:
     - turning hot
