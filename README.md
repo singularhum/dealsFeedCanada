@@ -10,14 +10,18 @@ This was created for my own personal use and preferences but you can [join the s
 
 - Posts new deals that are detected every 1-2 mins for Reddit sources, 5 mins for RFD and 30 mins for free deals
 - Use Discord notifications to get notified of new deals and/or use the server as a consolidated feeds reader
-- Displays and occassionaly updates the score/upvotes, number of comments and flair/status of each deal when available
+- Displays and occasionally updates the score/upvotes, number of comments and flair/status of each deal when available
 - Posts seperate notifications when deals turn hot (reaches a minimum score in a given time frame)
 - Marks deals as Expired / Sold Out when properly identified (ex. specific flairs from Reddit)
 - Ignores certain non-deal posts like daily/review discussion threads in /r/bapcsalescanada
 
 ## Feeds
 
-These are the main feeds the bot uses to look for deals and are located under the All Deals and Hot Deals categories of the server. The channels under All Deals will contain every deal from the source while the Hot Deals channels will only show deals that have reached a minimum score in a given time frame.
+These are the main feeds the bot uses to look for deals and are located under the All Deals and Hot Deals categories of the server. 
+
+The channels under All Deals will contain every deal from the source while the Hot Deals channels will only show deals that have reached a minimum score in a given time frame.
+
+Only about the latest 25-30 deals (first page) are tracked for each feed for occasionally keeping the it up-to-date.
 
 | Name | Description | Refresh Rate | Hot Deals | Source |
 | --- | --- | --- | --- | --- |
@@ -53,6 +57,8 @@ These are for limited-time free deals that I usually grab from personally. This 
 This category in the server will contain feeds that are not related to Canada. This can be useful for those of you that visit or have friends/family in other countries.
 
 These feeds are only visible if you opt-in. Head over to the #roles channel to get access.
+
+Only about the latest 25-30 deals (first page) are tracked for each feed for occasionally keeping the it up-to-date.
 
  Name | Location | Description | Refresh Rate | Source |
 | --- | --- | --- | --- | --- |
