@@ -315,7 +315,10 @@ async function sendNewToDiscord(article) {
         const channelId = getDiscordChannelId(article.source);
         const channel = discordClient.channels.cache.get(channelId);
 
-        await channel.send({ embeds: [embed] });
+        const message = await channel.send({ embeds: [embed] });
+        article.discord_message_id = message.id;
+        await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(article.id).set({ discord_message_id: article.discord_message_id }, { merge: true });
+
         functions.logger.log('Discord - ' + article.id + ' has been sent');
     } catch (error) {
         functions.logger.error('Discord - Error sending ' + article.id, error);
