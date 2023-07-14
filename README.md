@@ -50,7 +50,7 @@ These are for limited-time free deals that I usually grab from personally. This 
 
 ### Other Feeds
 
-This category in the server will contain feeds that are not related to Canadian-based deals. This can be useful for those of you that visit or have friends/family in other countries.
+This category in the server will contain feeds that are not related to Canada. This can be useful for those of you that visit or have friends/family in other countries.
 
 These feeds are only visible if you opt-in. Head over to the #roles channel to get access.
 
@@ -60,7 +60,9 @@ These feeds are only visible if you opt-in. Head over to the #roles channel to g
 | [Slickdeals Rising](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | A hot deals forum for the US. Since many deals are posted, this feed will only post deals that have reached a minimum of 5 upvotes. | 5 mins | Slickdeals RSS |
 | [Slickdeals Hot](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | The same as Slickdeals Rising but will only post deals with a minimum of 15 upvotes. | 5 mins | Slickdeals RSS |
 
-## Frequently Asked Questions (FAQ)
+<h2 id="faq">
+Frequently Asked Questions (FAQ)
+</h2>
 
 ### General
 
@@ -103,7 +105,7 @@ The roles assignment uses the YAGPDB.xyz bot so if it is offline it will not wor
 <details>
 <summary>Where do I report an issue or make a suggestion?</summary>
 
-Since the server has no open channels, you can post in the Issues section of this GitHub project for any problems or send a direct message to me on Discord.
+Since the server has no open channels, you can submit a report in the Issues section of this GitHub project or you can send me a direct message on Discord.
 
 You can also can also make suggestions but please note that this free server is for my own preferences so I may not action them.
 </details>
@@ -172,7 +174,7 @@ Free deals are linked directly to their product pages (except for RFD freebies).
 <details>
 <summary>Why was a deal not posted?</summary>
 
-A deal may not be posted for various reasons either by design or an error.
+A deal may not be posted for various reasons either by design or an error:
 - The post is not considered a deal and was ignored. This includes daily/review discussion threads in /r/bapcsalescanada and posts tagged as "Question" in /r/VideoGameDealsCanada.
 - For free deals, only limited-time deals are posted. So if a game is permanently free, it will generally not be posted.
 - The API might not have included the post within the refresh cycle so you might need to wait until the next refresh.
@@ -187,8 +189,8 @@ A deal may not be posted for various reasons either by design or an error.
 <summary>Which services and tools are used?</summary>
 
 - Firebase / Google Cloud
-- [Cloud Firestore](https://firebase.google.com/docs/firestore) - A NoSQL database to keep track of the deals to determine which ones are new or need to be updated
-- [Cloud Scheduler](https://firebase.google.com/docs/functions/schedule-functions) - For running a scheduled cloud function in the background using Node.js
+    - [Cloud Firestore](https://firebase.google.com/docs/firestore) - A NoSQL database to keep track of the deals to determine which ones are new or need to be updated
+    - [Cloud Scheduler](https://firebase.google.com/docs/functions/schedule-functions) - For running a scheduled cloud function in the background using Node.js
 - [Discord.js](https://discord.js.org) - For using the Discord API to send and edit messages
 - APIs from the sources that mostly return JSON
 </details>
