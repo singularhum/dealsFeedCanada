@@ -3,6 +3,8 @@ const GAMEDEALS = 'gamedeals';
 const REDFLAGDEALS = 'redflagdeals';
 const VIDEOGAMEDEALSCANADA = 'videogamedealscanada';
 const DB_DEALS_COLLECTION = 'deals';
+const DB_ALERTS_COLLECTION = 'alerts';
+const DB_ALERTS_REFRESH_COLLECTION = 'alerts-refresh';
 const EXPIRED_STATE = 'Expired';
 const SOLD_OUT_STATE = 'Sold Out';
 const UNTRACKED_STATE = 'Untracked';
@@ -25,7 +27,8 @@ initializeApp();
 
 // Globals that should persist until the instance is restarted which is done randomly by Google.
 const db = getFirestore();
-let dbDeals;
+let _dbDeals;
+let _dbAlerts;
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 /**
@@ -38,7 +41,10 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
 
     // Retrieve all deals from the DB to be able to determine what will be new or updated.
     // This is lazy loaded to prevent high DB read hits (each document counts as a read).
-    if (!dbDeals) dbDeals = await fetchDbDeals();
+    if (!_dbDeals) _dbDeals = await fetchDbDeals();
+
+    const requiresAlertssRefresh = await requireAlertsRefresh();
+    if (!_dbAlerts || requiresAlertssRefresh) _dbAlerts = await fetchDbAlerts();
 
     const deals = [];
     const newDeals = [];
@@ -60,9 +66,9 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
         revokeRedditAccessToken(redditAccessToken);
     }
 
-    await cleanDB(deals, updatedDeals);
-    await saveDeals(deals, newDeals, newlyHotDeals, updatedDeals);
-    await sendNotifications(newDeals, newlyHotDeals, updatedDeals);
+    await cleanDB(_dbDeals, deals, updatedDeals);
+    await saveDeals(_dbDeals, deals, newDeals, newlyHotDeals, updatedDeals);
+    await sendNotifications(newDeals, newlyHotDeals, updatedDeals, _dbAlerts);
 
     functions.logger.log('Scheduled Job Completed');
 
@@ -90,6 +96,35 @@ async function fetchDbDeals() {
     });
 
     return deals;
+}
+
+/**
+ * Whether the alerts need to be refreshed or not.
+ * @return {boolean} if refresh required.
+ */
+async function requireAlertsRefresh() {
+    functions.logger.log('Fetching whether to refresh alerts from db');
+
+    const dbRef = db.collection(DB_ALERTS_REFRESH_COLLECTION);
+    const dbSnapshot = await dbRef.get();
+    return dbSnapshot.docs[0].data().refresh;
+}
+
+/**
+ * Fetch the alerts in the database.
+ * @return {Array} An array of the alerts from the database.
+ */
+async function fetchDbAlerts() {
+    const alerts = [];
+    functions.logger.log('Fetching alerts from db');
+
+    const dbRef = db.collection(DB_ALERTS_COLLECTION);
+    const dbSnapshot = await dbRef.get();
+    dbSnapshot.forEach((doc) => {
+        alerts.push(doc.data());
+    });
+
+    return alerts;
 }
 
 /**
@@ -341,10 +376,11 @@ async function parseSubreddit(subredditName, accessToken) {
 /**
  * Remove deals older than 2 days that are not in the current parsed deals.
  * This is done to reduce the DB read costs in loading dbDeals.
+ * @param {Array} dbDeals The deals in the database.
  * @param {Array} deals The current parsed deals.
  * @param {Array} notificationUpdatedDeals The array to add the updated deals to.
  */
-async function cleanDB(deals, notificationUpdatedDeals) {
+async function cleanDB(dbDeals, deals, notificationUpdatedDeals) {
     functions.logger.info('Cleaning DB');
     const twoDaysAgo = getDaysAgo(2);
     const oneHourAgo = getHoursAgo(1);
@@ -393,12 +429,13 @@ async function cleanDB(deals, notificationUpdatedDeals) {
 
 /**
  * Go through the deals and save them to the DB depending on if they are new or updated.
+ * @param {Array} dbDeals The deals in the database.
  * @param {Array} deals The deals parsed.
  * @param {Array} newDeals An array to add the new deals to.
  * @param {Array} newlyHotDeals An array to add the newly hot deals to.
  * @param {Array} updatedDeals An array to add updated deals.
  */
-async function saveDeals(deals, newDeals, newlyHotDeals, updatedDeals) {
+async function saveDeals(dbDeals, deals, newDeals, newlyHotDeals, updatedDeals) {
     let bapcUpdateCount = 0;
     let gameDealsUpdateCount = 0;
     let rfdUpdateCount = 0;
@@ -550,8 +587,9 @@ function shouldUpdateScoreComment(difference, num) {
  * @param {Array} newDeals An array with all the new deals.
  * @param {Array} newlyHotDeals An array with all the newly hot deals.
  * @param {Array} updatedDeals An array with all the updated deals.
+ * @param {Array} dbAlerts An array of alerts in the database.
  */
-async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
+async function sendNotifications(newDeals, newlyHotDeals, updatedDeals, dbAlerts) {
     if (newDeals.length > 0 || newlyHotDeals.length > 0 || updatedDeals.length > 0) {
         let discordAvailable = false;
 
@@ -612,6 +650,16 @@ async function sendNotifications(newDeals, newlyHotDeals, updatedDeals) {
                 promises.push(sendToDiscord(updatedDeal, false, false));
             }
             await Promise.all(promises);
+
+            // Send out any alerts.
+            for (let i = newDeals.length - 1; i >= 0; i--) {
+                try {
+                    const newDeal = newDeals[i];
+                    await sendDiscordAlert(newDeal, dbAlerts);
+                } catch (error) {
+                    functions.logger.error('Error sending alert notification for ' + newDeals[i].id, error);
+                }
+            }
         }
     }
 }
@@ -744,6 +792,76 @@ async function sendDiscordUpdate(dealId, channel, messageId, embed) {
     } else {
         functions.logger.warn('Discord - ' + dealId + ' was not found in ' + channel.id);
     }
+}
+
+/**
+ * Sends an alert for any matching keywords for the supplied deal.
+ * @param {Object} newDeal The deal to check alerts against.
+ * @param {Array} dbAlerts The array of alerts from the database.
+ */
+async function sendDiscordAlert(newDeal, dbAlerts) {
+    try {
+        const matchingRoleIds = [];
+
+        dbAlerts.forEach((alert) => {
+            if (newDeal.source === alert.source) {
+                const regex = new RegExp(alert.keyword, 'i');
+                if (regex.test(newDeal.title)) {
+                    matchingRoleIds.push(alert.role_id);
+                }
+            }
+        });
+
+        if (matchingRoleIds.length > 0) {
+            let pingRolesText = '';
+            matchingRoleIds.forEach((matchingRoleId) => {
+                pingRolesText = pingRolesText + ' <@&' + matchingRoleId + '>';
+            });
+
+            const title = trimString(newDeal.title, 250);
+            const link = buildLink(newDeal);
+            const messageLink = buildMessageLink(newDeal);
+            const content = pingRolesText.trim() + '\n' + title;
+            const embedDescription = link + '\n\n' + messageLink;
+
+            const embed = new EmbedBuilder()
+                .setDescription(embedDescription)
+                .setColor(2829617);
+
+            const channel = discordClient.channels.cache.get(`${process.env.DISCORD_CHANNEL_DEAL_ALERTS}`);
+            functions.logger.log('Discord - Sending alert for ' + newDeal.id + ' to ' + channel.id);
+
+            await channel.send({ content: content, embeds: [embed] });
+            await setTimeout(300); // Wait a bit after each call for rate limit prevention.
+        }
+    } catch (error) {
+        functions.logger.error('Discord - Error sending alert for ' + newDeal.id, error);
+    }
+}
+
+/**
+ * Builds the message link based on the supplied deal.
+ * @param {Object} deal The deal to build the message link.
+ * @return {string} A URL message link.
+ */
+function buildMessageLink(deal) {
+    const baseUrl = 'https://discord.com/channels/%s/%s/%s';
+    const serverId = `${process.env.DISCORD_SERVER_ID}`;
+    let channelId;
+
+    if (deal.source === BAPCSALESCANADA) {
+        channelId = `${process.env.DISCORD_CHANNEL_BAPCSALESCANADA}`;
+    } else if (deal.source === GAMEDEALS) {
+        channelId = `${process.env.DISCORD_CHANNEL_GAMEDEALS}`;
+    } else if (deal.source === REDFLAGDEALS) {
+        channelId = `${process.env.DISCORD_CHANNEL_REDFLAGDEALS}`;
+    } else if (deal.source === VIDEOGAMEDEALSCANADA) {
+        channelId = `${process.env.DISCORD_CHANNEL_VIDEOGAMEDEALSCANADA}`;
+    } else {
+        throw new Error('Source of "' + deal.source + '" is unhandled');
+    }
+
+    return util.format(baseUrl, serverId, channelId, deal.discord_message_id);
 }
 
 /**
