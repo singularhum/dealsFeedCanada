@@ -44,7 +44,7 @@ module.exports.fetch = async function() {
  * @param {boolean} merge Whether to merge the free deal or not.
  */
 module.exports.setFreeDeal = async function(id, obj, merge) {
-    // return await db.collection(DB_COLLECTION).doc(id).set(obj, { merge: merge });
+    return await db.collection(DB_COLLECTION).doc(id).set(obj, { merge: merge });
 };
 
 /**
