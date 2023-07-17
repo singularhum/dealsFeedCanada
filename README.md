@@ -10,6 +10,7 @@ This was created for my own personal use and preferences but you can [join the s
 
 - Posts new deals that are detected every 1-2 mins for Reddit sources, 5 mins for RFD and 30 mins for free deals
 - Use Discord notifications to get notified of new deals and/or use the server as a consolidated feeds reader
+- Subscribe to alerts when deals contain certain keywords (ex. Price Error) and/or request your own
 - Displays and occasionally updates the score/upvotes, number of comments and flair/status of each deal when available
 - Posts separate notifications when deals turn hot (reaches a minimum score in a given time frame)
 - Marks deals as Expired / Sold Out when properly identified (ex. specific flairs from Reddit)
@@ -65,6 +66,19 @@ Only about the latest 25-30 deals (first page) are tracked for each feed for occ
 | [OzBargain](https://www.ozbargain.com.au/deals) | Australia | A popular community driven website in Australia for deals. All deals are posted. | 5 mins | OzBargain RSS |
 | [Slickdeals Rising](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | A hot deals forum for the US. Since many deals are posted, this feed will only post deals that have reached a minimum of 5 upvotes. | 5 mins | Slickdeals RSS |
 | [Slickdeals Hot](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | The same as Slickdeals Rising but will only post deals with a minimum of 15 upvotes. | 5 mins | Slickdeals RSS |
+
+## Alerts (Beta)
+
+Alerts will ping you when new deals are posted that contain certain keywords. This feature is useful for those that may only want to be notified for specific deals instead of all deals.
+
+Alerts can be enabled by subscribing to a predefined list of keywords or requesting your own custom ones. When subscribing to an alert, you will be assigned the appropriate role by a bot which will be pinged when a matching deal is found.
+
+If you want to access it, head on over to the #⁠roles channel and react to the 🔔.
+
+The Alerts category contains three channels:
+- alerts - This will contain all the pinged alerts with a reference to the originating post in All Deals
+- configure - This is where you can subscribe to predefined alerts (more to be added based on requests)
+- requests - Instructions on how to request custom alerts
 
 <h2 id="faq">
 Frequently Asked Questions (FAQ)
@@ -187,6 +201,50 @@ A deal may not be posted for various reasons either by design or an error:
 - There was an error with the Discord API. If a message fails to send, it will not be resent.
 - There was an error with the source API.
 - The deal was posted but removed by Admins. The deal could have been a scam or not deal related.
+</details>
+
+### Alerts
+
+<details>
+<summary>How do I get access to alerts?</summary>
+
+Please go to the #roles channel and react to the Alerts emoji to get access to the Alerts category. Next head over to the #configure channel to select which alerts you want to subscribe to.
+</details>
+
+<details>
+<summary>How are alerts pinged to me?</summary>
+
+When you subscribe to an alert, you will be assigned to a corresponding role. Once a deal matches the alert, the role will be pinged in the #alerts channel.
+</details>
+
+<details>
+<summary>What kind of matching is used for the keywords?</summary>
+
+By default the matching is done by finding the entire phrase in the title/name of a deal post (case-insensitive). This means if there are multiple words being used like "Mountain Bike" then it will match any deals that contain the exact words of "Mountain Bike" in the title/name.
+
+The search can be more complex if needed since it uses a regular expression for the matching. For example, an existing alert for "CPU" currently ignores a deal with "CPU Cooler".
+</details>
+
+<details>
+<summary>Can I request custom alerts?</summary>
+
+Yes, please go to the #requests channel for instructions to request your own alerts. These will be manually added by me when I get the chance.
+</details>
+
+<details>
+<summary>Why are alerts posted in its own channel and not on the actual deal posted?</summary>
+
+Currently, deals are posted using an embed due to nicer formatting available like hyperlinks so that the title/name of the deal contains the link. However, embeds do not allow pinging. By adding the ping above the embed, the text in notifications will only contain the ping and not the deal's title/name.
+
+Another option is to not use embeds but hyperlinks are not allowed yet so the formatting wouldn't be as good.
+
+So to not change the formatting for now, a separate post with the alert formatting will be made.
+</details>
+
+<details>
+<summary>Why am I not gettings alerts or getting notified for all alerts?</summary>
+
+Please remember to set your notification settings for the #alerts channel to be "Only @mentions" and not "All Messages" so that you are only notified for the alerts you subscribed to.
 </details>
 
 ### Technical
