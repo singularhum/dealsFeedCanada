@@ -131,15 +131,17 @@ function createEmbed(article) {
   }
 
   try {
-    let scoreFormat = null;
-    if (article.score != null && article.score >= 0) {
-      scoreFormat = '+' + article.score;
+    let scoreText;
+    if (article.score !== null && article.score >= 0) {
+      scoreText = '+' + article.score;
+    } else {
+      scoreText = article.score;
     }
 
-    if (article.score != null && article.external_source) {
-      embed.setDescription(util.format('%s score · %s', scoreFormat, article.external_source));
+    if (article.score !== null && article.external_source) {
+      embed.setDescription(util.format('%s score · %s', scoreText, article.external_source));
     } else if (article.score) {
-      embed.setDescription(util.format('%s score', scoreFormat));
+      embed.setDescription(util.format('%s score', scoreText));
     } else if (article.external_source) {
       embed.setDescription(article.external_source);
     }
