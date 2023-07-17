@@ -1,7 +1,7 @@
 const functions = require('firebase-functions');
-const database = require('./database.js');
-const defaultParser = require('./parsers/default.js');
-const notifications = require('./notifications.js');
+const database = require('./database');
+const defaultParser = require('./parsers/default');
+const notifications = require('./notifications');
 
 // Globals that should persist until the instance is restarted which is done randomly by Google.
 let _dbArticles;

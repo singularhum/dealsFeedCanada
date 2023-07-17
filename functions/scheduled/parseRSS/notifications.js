@@ -1,8 +1,8 @@
 const functions = require('firebase-functions');
 const { setTimeout } = require('timers/promises');
 const { Client, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
-const database = require('./database.js');
-const helpers = require('./helpers.js');
+const database = require('./database');
+const helpers = require('./helpers');
 const util = require('util');
 
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });

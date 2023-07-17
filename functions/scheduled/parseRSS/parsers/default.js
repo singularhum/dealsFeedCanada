@@ -1,9 +1,9 @@
 const functions = require('firebase-functions');
-const database = require('./../database.js');
+const database = require('./../database');
 const cheerio = require('cheerio');
-const slickdealsParser = require('./slickdeals.js');
-const ozbargainParser = require('./ozbargain.js');
-const helpers = require('./../helpers.js');
+const slickdealsParser = require('./slickdeals');
+const ozbargainParser = require('./ozbargain');
+const helpers = require('./../helpers');
 
 /**
  * Parse RSS Feeds.
