@@ -174,7 +174,7 @@ module.exports.saveDeals = async function(dbDeals, deals, newDeals, newlyHotDeal
                         } else if (dbDeal.source === reddit.IDs.GAMEDEALS) {
                             gameDealsUpdateCount += 1;
                             shouldUpdate = gameDealsUpdateCount <= 3;
-                        } else if (dbDeal.source === reddit.IDs.REDFLAGDEALS) {
+                        } else if (dbDeal.source === redflagdeals.ID) {
                             rfdUpdateCount += 1;
                             shouldUpdate = rfdUpdateCount <= 5;
                         } else if (dbDeal.source === reddit.IDs.VIDEOGAMEDEALSCANADA) {

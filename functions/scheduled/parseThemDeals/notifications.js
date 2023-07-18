@@ -109,7 +109,7 @@ async function sendToDiscord(deal, isNew, sendToHot) {
         } else if (deal.source === reddit.IDs.GAMEDEALS) {
             allChannelId = `${process.env.DISCORD_CHANNEL_GAMEDEALS}`;
             hotChannelId = `${process.env.DISCORD_CHANNEL_HOT_GAMEDEALS}`;
-        } else if (deal.source === reddit.IDs.REDFLAGDEALS) {
+        } else if (deal.source === redflagdeals.ID) {
             allChannelId = `${process.env.DISCORD_CHANNEL_REDFLAGDEALS}`;
             hotChannelId = `${process.env.DISCORD_CHANNEL_HOT_REDFLAGDEALS}`;
         } else if (deal.source === reddit.IDs.VIDEOGAMEDEALSCANADA) {
