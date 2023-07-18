@@ -195,7 +195,7 @@ module.exports.saveDeals = async function(dbDeals, deals, newDeals, newlyHotDeal
                     dbDeal.date = new Date();
 
                     // When RFD deal is expired/moved, the score is returned as 0 so ignore that.
-                    if (dbDeal.source !== constants.REDFLAGDEALS || (dbDeal.tag !== constants.EXPIRED_STATE && dbDeal.tag !== constants.MOVED_STATE)) {
+                    if (dbDeal.source !== redflagdeals.ID || (dbDeal.tag !== constants.EXPIRED_STATE && dbDeal.tag !== constants.MOVED_STATE)) {
                         dbDeal.score = deal.score;
                     }
 
