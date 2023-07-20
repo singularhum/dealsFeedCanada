@@ -242,7 +242,7 @@ So to not change the formatting for now, a separate post with the alert formatti
 </details>
 
 <details>
-<summary>Why am I not gettings alerts or getting notified for all alerts?</summary>
+<summary>Why am I not getting alerts or getting notified for all alerts?</summary>
 
 Please remember to set your notification settings for the #alerts channel to be "Only @mentions" and not "All Messages" so that you are only notified for the alerts you subscribed to.
 </details>
