@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 const database = require('./../database');
 const cheerio = require('cheerio');
+const hotukdealsParser = require('./hotukdeals');
 const slickdealsParser = require('./slickdeals');
 const ozbargainParser = require('./ozbargain');
 const helpers = require('./../helpers');
@@ -45,6 +46,8 @@ module.exports.parse = async function(feed, dbArticles, articles, newArticles, u
                         slickdealsParser.parse(feed, article, feedElement, $);
                     } else if (feed.source === 'ozbargain') {
                         ozbargainParser.parse(feed, article, feedElement, $);
+                    } else if (feed.source === 'hotukdeals') {
+                        hotukdealsParser.parse(feed, article, feedElement, $);
                     }
 
                     articles.push(article);
@@ -87,9 +90,9 @@ async function saveDB(feed, dbArticles, articles, newArticles, updateArticles) {
                     if (!shouldUpdate && article.score) {
                         const difference = Math.abs(dbArticle.score - article.score);
                         if (article.score >= 200 || article.score <= -200) {
-                            shouldUpdate = difference >= 50;
+                            shouldUpdate = difference >= 100;
                         } else if (article.score >= 100 || article.score <= -100) {
-                            shouldUpdate = difference >= 20;
+                            shouldUpdate = difference >= 50;
                         } else if (article.score >= 20 || article.score <= -20) {
                             shouldUpdate = difference >= 10;
                         } else if (article.score >= 10 || article.score <= -10) {
@@ -118,15 +121,15 @@ async function saveDB(feed, dbArticles, articles, newArticles, updateArticles) {
         }
     }
 
-    const twoDaysAgo = helpers.getDaysAgo(2);
+    const oneDayAgo = helpers.getDaysAgo(1);
     for (let i = dbArticles.length - 1; i >= 0; i--) {
         try {
             const dbArticle = dbArticles[i];
             if (dbArticle.source === feed.id) {
                 const foundArticle = articles.find((article) => article.id === dbArticle.id);
 
-                if (!foundArticle && dbArticle.posted_date < twoDaysAgo) {
-                    // Delete from DB if over two days old and remove from array.
+                if (!foundArticle && dbArticle.posted_date < oneDayAgo) {
+                    // Delete from DB if over a day old and remove from array.
                     await database.deleteArticle(dbArticle.id);
                     dbArticles.splice(i, 1);
                     functions.logger.info('Article ' + dbArticle.id + ' removed from DB');
