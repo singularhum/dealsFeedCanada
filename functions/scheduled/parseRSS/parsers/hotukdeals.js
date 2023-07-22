@@ -1,6 +1,6 @@
 
 /**
- * Sets custom properties and values for OzBargain.
+ * Sets custom properties and values for hotukdeals.
  * @param {Object} feed The feed to retrieve.
  * @param {Object} article The current article to set.
  * @param {Object} feedElement The feed element being parsed.
