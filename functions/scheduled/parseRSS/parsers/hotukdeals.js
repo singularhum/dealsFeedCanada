@@ -27,7 +27,10 @@ module.exports.parse = function(feed, article, feedElement, $) {
 
     const merchantElement = $(feedElement).find('pepper\\:merchant');
     if (merchantElement) {
-        article.external_source = $(merchantElement).attr('name');
+        const merchantName = $(merchantElement).attr('name');
+        if (merchantName) {
+            article.external_source = merchantName;
+        }
 
         const price = $(merchantElement).attr('price');
         if (price) {
