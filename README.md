@@ -22,7 +22,7 @@ These are the main feeds the bot uses to look for deals and are located under th
 
 The channels under All Deals will contain every deal from the source while the Hot Deals channels will only show deals that have reached a minimum score in a given time frame.
 
-Only about the latest 25-30 deals (first page) are tracked for each feed for occasionally keeping the it up-to-date.
+Only about the latest 25-30 deals (first page) are tracked for each feed for occasionally keeping them up-to-date.
 
 | Name | Description | Refresh Rate | Hot Deals | Source |
 | --- | --- | --- | --- | --- |
@@ -59,7 +59,7 @@ This category in the server will contain feeds that are not related to Canada. T
 
 These feeds are only visible if you opt-in. Head over to the #roles channel to get access.
 
-Only about the latest 25-30 deals (first page) are tracked for each feed for occasionally keeping the it up-to-date.
+Only about the latest 25-30 deals (first page) are tracked for each feed for occasionally keeping them up-to-date.
 
  Name | Location | Description | Refresh Rate | Source |
 | --- | --- | --- | --- | --- |
