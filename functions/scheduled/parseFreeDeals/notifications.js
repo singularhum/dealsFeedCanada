@@ -173,11 +173,6 @@ function setMessageDescriptionTimestamp(embed, freeDeal) {
     try {
         if (freeDeal.expiry_date) {
             const unixTimestamp = Math.floor(freeDeal.expiry_date.getTime() / 1000);
-            let formatType = 'f';
-
-            if (freeDeal.source === ueMarketplace.ID) {
-                formatType = 'D';
-            }
 
             let expireText;
             if (freeDeal.isExpired) {
@@ -186,7 +181,7 @@ function setMessageDescriptionTimestamp(embed, freeDeal) {
                 expireText = 'Expires';
             }
 
-            embed.setDescription(util.format('%s <t:%s:%s>', expireText, unixTimestamp, formatType));
+            embed.setDescription(util.format('%s <t:%s:f>', expireText, unixTimestamp));
         }
     } catch (e) {
         functions.logger.error('Discord - Failed to set footer for ' + freeDeal.id, e);

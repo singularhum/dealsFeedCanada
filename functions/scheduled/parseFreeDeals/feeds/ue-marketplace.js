@@ -41,7 +41,7 @@ module.exports.ID = 'UE Marketplace';
                     const currentDate = new Date();
                     const nextMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1);
                     const firstWeekdayInMonth = nextMonthDate.getDay();
-                    const firstTuesdayDay = 2 + ((8 - firstWeekdayInMonth) % 7);
+                    const firstTuesdayDay = 1 + ((2 - firstWeekdayInMonth + 7) % 7);
                     const firstTuesdayOfNextMonth = new Date(nextMonthDate.getFullYear(), nextMonthDate.getMonth(), firstTuesdayDay);
                     firstTuesdayOfNextMonth.setUTCHours(14);
                     freeDeal.expiry_date = firstTuesdayOfNextMonth;
