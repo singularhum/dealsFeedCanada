@@ -5,7 +5,7 @@ const database = require('../database');
 module.exports.ID = 'Prime Gaming';
 
 /**
- * Parse Epic store for free games.
+ * Parse Prime Gaming store for free games.
  * @param {Array} dbFreeDeals An array of the free deals in the DB.
  * @param {Array} freeDeals An array of the free deals being parsed.
  */
