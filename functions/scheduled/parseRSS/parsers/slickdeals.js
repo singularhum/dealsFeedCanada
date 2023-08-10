@@ -44,4 +44,7 @@ module.exports.parse = function(feed, article, feedElement, $) {
             }
         }
     }
+
+    // Override the posted date to be when it is included in the feed to prevent dups more
+    article.posted_date = new Date();
 };
