@@ -22,28 +22,40 @@ let _dbFreeDeals;
 exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60 }).pubsub.schedule('every 30 minutes').onRun(async (context) => {
     functions.logger.info('Scheduled Job Start');
 
-    // Retrieve all deals from the DB to be able to determine what will be new or updated.
-    // This is lazy loaded to prevent high DB read hits (each document counts as a read).
-    if (!_dbFreeDeals) _dbFreeDeals = await database.fetch();
+    const notificationsAvailable = await notifications.login();
 
-    const freeDeals = [];
-    const currentDate = new Date();
+    if (notificationsAvailable) {
+        // Retrieve all deals from the DB to be able to determine what will be new or updated.
+        // This is lazy loaded to prevent high DB read hits (each document counts as a read).
+        if (!_dbFreeDeals) _dbFreeDeals = await database.fetch();
 
-    await steam.parse(_dbFreeDeals, freeDeals);
-    await gog.parse(_dbFreeDeals, freeDeals);
-    if (currentDate.getHours() !== 7) {
-        // Free games tend to disappear and come back in this hour so ignore for now.
-        await fanatical.parse(_dbFreeDeals, freeDeals);
+        const freeDeals = [];
+        const missedFreeDeals = [];
+        const currentDate = new Date();
+
+        // Resend any that were missed.
+        for (const freeDeal of _dbFreeDeals) {
+            if (freeDeal.discord_message_id === undefined) {
+                missedFreeDeals.push(freeDeal);
+            }
+        }
+
+        await steam.parse(_dbFreeDeals, freeDeals);
+        await gog.parse(_dbFreeDeals, freeDeals);
+        if (currentDate.getHours() !== 7) {
+            // Free games tend to disappear and come back in this hour so ignore for now.
+            await fanatical.parse(_dbFreeDeals, freeDeals);
+        }
+        await epic.parse(_dbFreeDeals, freeDeals);
+        await ueMarketplace.parse(_dbFreeDeals, freeDeals);
+        await playStore.parse(_dbFreeDeals, freeDeals);
+        await primeGaming.parse(_dbFreeDeals, freeDeals);
+        await indiegala.parse(_dbFreeDeals, freeDeals);
+        await rfdFreebies.parse(_dbFreeDeals, freeDeals);
+        await ubisoft.parse(_dbFreeDeals, freeDeals);
+
+        await notifications.send(freeDeals, missedFreeDeals);
     }
-    await epic.parse(_dbFreeDeals, freeDeals);
-    await ueMarketplace.parse(_dbFreeDeals, freeDeals);
-    await playStore.parse(_dbFreeDeals, freeDeals);
-    await primeGaming.parse(_dbFreeDeals, freeDeals);
-    await indiegala.parse(_dbFreeDeals, freeDeals);
-    await rfdFreebies.parse(_dbFreeDeals, freeDeals);
-    await ubisoft.parse(_dbFreeDeals, freeDeals);
-
-    await notifications.send(freeDeals);
 
     functions.logger.log('Scheduled Job Completed');
 

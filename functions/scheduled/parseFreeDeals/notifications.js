@@ -17,11 +17,48 @@ const ueMarketplace = require('./feeds/ue-marketplace');
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 /**
+ * Logins to the notification service.
+ * @return {boolean} Whether the login was successful or not.
+ */
+module.exports.login = async function() {
+    let discordAvailable = false;
+
+    if (discordClient.isReady()) {
+        functions.logger.log('Discord - Already logged in');
+        discordAvailable = true;
+    } else {
+        const promiseDiscordLogin = new Promise((resolve, reject) => {
+            // Register Discord events before logging in.
+            discordClient.once(Events.Error, reject);
+            discordClient.once(Events.ClientReady, (c) => {
+                functions.logger.log('Discord - Logged in as ' + c.user.tag);
+                discordAvailable = true;
+                resolve();
+            });
+
+            // Login to Discord with token.
+            functions.logger.log('Discord - Logging in');
+            discordClient.login(`${process.env.DISCORD_BOT_TOKEN}`);
+        });
+
+        const promiseTimeout = new Promise((resolve, reject) => setTimeout(() => reject(new Error('Discord - Logging in timed out.')), 10000));
+        await Promise.race([promiseTimeout, promiseDiscordLogin]);
+    }
+
+    if (!discordAvailable) {
+        functions.logger.error('Discord - Error logging in');
+    }
+
+    return discordAvailable;
+};
+
+/**
  * Sends notifications for the free deals.
  * @param {Array} freeDeals An array with the current free deals.
+ * @param {Array} missedFreeDeals An array of free deals that weren't sent.
  */
-module.exports.send = async function(freeDeals) {
-    const newFreeDeals = [];
+module.exports.send = async function(freeDeals, missedFreeDeals) {
+    const newFreeDeals = missedFreeDeals;
     const expiredFreeDeals = [];
 
     for (let i = freeDeals.length - 1; i >= 0; i--) {
@@ -38,54 +75,26 @@ module.exports.send = async function(freeDeals) {
         }
     }
 
-    if (newFreeDeals.length > 0 || expiredFreeDeals.length > 0) {
-        let discordAvailable = false;
+    if ((newFreeDeals.length > 0 || expiredFreeDeals.length > 0) && discordClient.isReady()) {
+        for (const newFreeDeal of newFreeDeals) {
+            try {
+                await sendNewToDiscord(newFreeDeal, false);
 
-        try {
-            if (discordClient.isReady()) {
-                functions.logger.log('Discord - Already logged in');
-                discordAvailable = true;
-            } else {
-                // Wait for the client to be ready.
-                await new Promise((resolve, reject) => {
-                    // Register Discord events before logging in.
-                    discordClient.once(Events.Error, reject);
-                    discordClient.once(Events.ClientReady, (c) => {
-                        functions.logger.log('Discord - Logged in as ' + c.user.tag);
-                        discordAvailable = true;
-                        resolve();
-                    });
-
-                    // Login to Discord with token.
-                    functions.logger.log('Discord - Logging in');
-                    discordClient.login(`${process.env.DISCORD_BOT_TOKEN}`);
-                });
+                // Wait a bit after each call for rate limit prevention.
+                await setTimeout(2000);
+            } catch (error) {
+                functions.logger.error('Error sending new notification for ' + newFreeDeal.id, error);
             }
-        } catch (error) {
-            functions.logger.error('Discord - Error logging in', error);
         }
 
-        if (discordAvailable) {
-            for (const newFreeDeal of newFreeDeals) {
-                try {
-                    await sendNewToDiscord(newFreeDeal, false);
+        for (const expiredFreeDeal of expiredFreeDeals) {
+            try {
+                await sendExpiredToDiscord(expiredFreeDeal);
 
-                    // Wait a bit after each call for rate limit prevention.
-                    await setTimeout(2000);
-                } catch (error) {
-                    functions.logger.error('Error sending new notification for ' + newFreeDeal.id, error);
-                }
-            }
-
-            for (const expiredFreeDeal of expiredFreeDeals) {
-                try {
-                    await sendExpiredToDiscord(expiredFreeDeal);
-
-                    // Wait a bit after each call for rate limit prevention.
-                    await setTimeout(2000);
-                } catch (error) {
-                    functions.logger.error('Error sending expired notification for ' + expiredFreeDeal.id, error);
-                }
+                // Wait a bit after each call for rate limit prevention.
+                await setTimeout(2000);
+            } catch (error) {
+                functions.logger.error('Error sending expired notification for ' + expiredFreeDeal.id, error);
             }
         }
     }

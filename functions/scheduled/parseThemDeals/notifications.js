@@ -11,6 +11,42 @@ const helpers = require('./helpers');
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
 
 /**
+ * Logins to the notification service.
+ * @return {boolean} Whether the login was successful or not.
+ */
+module.exports.login = async function() {
+    let discordAvailable = false;
+
+    if (discordClient.isReady()) {
+        functions.logger.log('Discord - Already logged in');
+        discordAvailable = true;
+    } else {
+        const promiseDiscordLogin = new Promise((resolve, reject) => {
+            // Register Discord events before logging in.
+            discordClient.once(Events.Error, reject);
+            discordClient.once(Events.ClientReady, (c) => {
+                functions.logger.log('Discord - Logged in as ' + c.user.tag);
+                discordAvailable = true;
+                resolve();
+            });
+
+            // Login to Discord with token.
+            functions.logger.log('Discord - Logging in');
+            discordClient.login(`${process.env.DISCORD_BOT_TOKEN}`);
+        });
+
+        const promiseTimeout = new Promise((resolve, reject) => setTimeout(() => reject(new Error('Discord - Logging in timed out.')), 10000));
+        await Promise.race([promiseTimeout, promiseDiscordLogin]);
+    }
+
+    if (!discordAvailable) {
+        functions.logger.error('Discord - Error logging in');
+    }
+
+    return discordAvailable;
+};
+
+/**
  * Sends notifications for new, hot and updated deals. Currently is only for Discord.
  * @param {Array} newDeals An array with all the new deals.
  * @param {Array} newlyHotDeals An array with all the newly hot deals.
@@ -18,75 +54,47 @@ const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
  * @param {Array} dbAlerts An array of alerts in the database.
  */
 module.exports.send = async function(newDeals, newlyHotDeals, updatedDeals, dbAlerts) {
-    if (newDeals.length > 0 || newlyHotDeals.length > 0 || updatedDeals.length > 0) {
-        let discordAvailable = false;
+    // Send the new and hot deals in sequential order, and do the updates in any order.
+    if ((newDeals.length > 0 || newlyHotDeals.length > 0 || updatedDeals.length > 0) && discordClient.isReady()) {
+        // Send out the new notifications first (go backwards as the deals were sorted new from top to bottom).
+        for (let i = newDeals.length - 1; i >= 0; i--) {
+            try {
+                const newDeal = newDeals[i];
+                await sendToDiscord(newDeal, true, false);
 
-        try {
-            if (discordClient.isReady()) {
-                functions.logger.log('Discord - Already logged in');
-                discordAvailable = true;
-            } else {
-                // Wait for the client to be ready.
-                await new Promise((resolve, reject) => {
-                    // Register Discord events before logging in.
-                    discordClient.once(Events.Error, reject);
-                    discordClient.once(Events.ClientReady, (c) => {
-                        functions.logger.log('Discord - Logged in as ' + c.user.tag);
-                        discordAvailable = true;
-                        resolve();
-                    });
+                // If deal is both new and hot, also send to hot channel.
+                if (newDeal.is_hot) await sendToDiscord(newDeal, false, true);
 
-                    // Login to Discord with token.
-                    functions.logger.log('Discord - Logging in');
-                    discordClient.login(`${process.env.DISCORD_BOT_TOKEN}`);
-                });
+                await setTimeout(300); // Wait a bit after each call for rate limit prevention.
+            } catch (error) {
+                functions.logger.error('Error sending new notification for ' + newDeals[i].id, error);
             }
-        } catch (error) {
-            functions.logger.error('Discord - Error logging in', error);
         }
 
-        // Send the new and hot deals in sequential order, and do the updates in any order.
-        if (discordAvailable) {
-            // Send out the new notifications first (go backwards as the deals were sorted new from top to bottom).
-            for (let i = newDeals.length - 1; i >= 0; i--) {
-                try {
-                    const newDeal = newDeals[i];
-                    await sendToDiscord(newDeal, true, false);
-
-                    // If deal is both new and hot, also send to hot channel.
-                    if (newDeal.is_hot) await sendToDiscord(newDeal, false, true);
-
-                    await setTimeout(300); // Wait a bit after each call for rate limit prevention.
-                } catch (error) {
-                    functions.logger.error('Error sending new notification for ' + newDeals[i].id, error);
-                }
+        // Send out the newly hot notifications.
+        for (let i = newlyHotDeals.length - 1; i >= 0; i--) {
+            try {
+                await sendToDiscord(newlyHotDeals[i], false, true);
+                await setTimeout(300);
+            } catch (error) {
+                functions.logger.error('Error sending newly hot notification for ' + newlyHotDeals[i].id, error);
             }
+        }
 
-            // Send out the newly hot notifications.
-            for (let i = newlyHotDeals.length - 1; i >= 0; i--) {
-                try {
-                    await sendToDiscord(newlyHotDeals[i], false, true);
-                    await setTimeout(300);
-                } catch (error) {
-                    functions.logger.error('Error sending newly hot notification for ' + newlyHotDeals[i].id, error);
-                }
-            }
+        // Send out the updated notifications. Use Promise.all and let Discord.js handle rate limits with the updates.
+        const promises = [];
+        for (const updatedDeal of updatedDeals) {
+            promises.push(sendToDiscord(updatedDeal, false, false));
+        }
+        await Promise.all(promises);
 
-            // Send out the updated notifications. Use Promise.all and let Discord.js handle rate limits with the updates.
-            const promises = [];
-            for (const updatedDeal of updatedDeals) {
-                promises.push(sendToDiscord(updatedDeal, false, false));
-            }
-            await Promise.all(promises);
-
-            // Send out any alerts.
-            for (let i = newDeals.length - 1; i >= 0; i--) {
-                try {
-                    const newDeal = newDeals[i];
-                    await sendDiscordAlert(newDeal, dbAlerts);
-                } catch (error) {
-                    functions.logger.error('Error sending alert notification for ' + newDeals[i].id, error);
-                }
+        // Send out any alerts.
+        for (let i = newDeals.length - 1; i >= 0; i--) {
+            try {
+                const newDeal = newDeals[i];
+                await sendDiscordAlert(newDeal, dbAlerts);
+            } catch (error) {
+                functions.logger.error('Error sending alert notification for ' + newDeals[i].id, error);
             }
         }
     }

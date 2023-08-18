@@ -13,7 +13,7 @@ const db = getFirestore();
  * @return {Array} An array of the feeds from the database.
  */
 module.exports.fetchFeeds = async function() {
-  return await fetch(RSS_FEEDS_DB_COLLECTION);
+    return await fetch(RSS_FEEDS_DB_COLLECTION);
 };
 
 /**
@@ -21,7 +21,7 @@ module.exports.fetchFeeds = async function() {
  * @return {Array} An array of the articles from the database.
  */
 module.exports.fetchArticles = async function() {
-  return await fetch(RSS_ARTICLES_DB_COLLECTION);
+    return await fetch(RSS_ARTICLES_DB_COLLECTION);
 };
 
 /**
@@ -31,7 +31,7 @@ module.exports.fetchArticles = async function() {
  * @param {boolean} merge Whether to merge the article or not.
  */
 module.exports.setArticle = async function(id, obj, merge) {
-  return await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(id).set(obj, { merge: merge });
+    return await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(id).set(obj, { merge: merge });
 };
 
 /**
@@ -39,7 +39,7 @@ module.exports.setArticle = async function(id, obj, merge) {
  * @param {string} documentPath The id of the article to delete.
  */
 module.exports.deleteArticle = async function(documentPath) {
-  return await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(documentPath).delete();
+    return await db.collection(RSS_ARTICLES_DB_COLLECTION).doc(documentPath).delete();
 };
 
 /**
@@ -48,25 +48,25 @@ module.exports.deleteArticle = async function(documentPath) {
  * @return {Array} An array of the items from the database.
  */
 async function fetch(collectionPath) {
-  functions.logger.log('Fetching ' + collectionPath + ' from db');
+    functions.logger.log('Fetching ' + collectionPath + ' from db');
 
-  const dbItems = [];
-  const dbFItemsRef = db.collection(collectionPath);
-  const dbItemsSnapshot = await dbFItemsRef.get();
-  dbItemsSnapshot.forEach((doc) => {
-    dbItems.push(doc.data());
-  });
+    const dbItems = [];
+    const dbFItemsRef = db.collection(collectionPath);
+    const dbItemsSnapshot = await dbFItemsRef.get();
+    dbItemsSnapshot.forEach((doc) => {
+        dbItems.push(doc.data());
+    });
 
-  // Firestore returns the dates as Timestamp so convert to date.
-  dbItems.forEach((dbItem) => {
-    if (dbItem.date) {
-      dbItem.date = dbItem.date.toDate();
-    }
+    // Firestore returns the dates as Timestamp so convert to date.
+    dbItems.forEach((dbItem) => {
+        if (dbItem.date) {
+            dbItem.date = dbItem.date.toDate();
+        }
 
-    if (dbItem.posted_date) {
-      dbItem.posted_date = dbItem.posted_date.toDate();
-    }
-  });
+        if (dbItem.posted_date) {
+            dbItem.posted_date = dbItem.posted_date.toDate();
+        }
+    });
 
-  return dbItems;
+    return dbItems;
 }

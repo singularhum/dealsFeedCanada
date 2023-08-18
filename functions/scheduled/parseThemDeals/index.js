@@ -22,36 +22,47 @@ let _dbAlerts;
 exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.schedule('every 1 minutes').onRun(async (context) => {
     functions.logger.info('Scheduled Job Start');
 
-    // Retrieve all deals from the DB to be able to determine what will be new or updated.
-    // This is lazy loaded to prevent high DB read hits (each document counts as a read).
-    if (!_dbDeals) _dbDeals = await database.fetchDeals();
+    const notificationsAvailable = await notifications.login();
 
-    const requiresAlertssRefresh = await database.requireAlertsRefresh();
-    if (!_dbAlerts || requiresAlertssRefresh) _dbAlerts = await database.fetchAlerts();
+    if (notificationsAvailable) {
+        // Retrieve all deals from the DB to be able to determine what will be new or updated.
+        // This is lazy loaded to prevent high DB read hits (each document counts as a read).
+        if (!_dbDeals) _dbDeals = await database.fetchDeals();
 
-    const deals = [];
-    const newDeals = [];
-    const newlyHotDeals = [];
-    const updatedDeals = [];
+        const requiresAlertssRefresh = await database.requireAlertsRefresh();
+        if (!_dbAlerts || requiresAlertssRefresh) _dbAlerts = await database.fetchAlerts();
 
-    // Only do RFD on every 5 minutes in the hour.
-    if ((new Date).getMinutes() % 5 === 0) {
-        helpers.logIP();
-        deals.push(...await redflagdeals.parse());
+        const deals = [];
+        const newDeals = [];
+        const newlyHotDeals = [];
+        const updatedDeals = [];
+
+        // Resend any that were missed.
+        for (const deal of _dbDeals) {
+            if (deal.discord_message_id === undefined) {
+                newDeals.push(deal);
+            }
+        }
+
+        // Only do RFD on every 5 minutes in the hour.
+        if ((new Date).getMinutes() % 5 === 0) {
+            helpers.logIP();
+            deals.push(...await redflagdeals.parse());
+        }
+
+        const redditAccessToken = await reddit.getRedditAccessToken();
+        if (redditAccessToken) {
+            deals.push(...await reddit.parseSubreddit(reddit.IDs.BAPCSALESCANADA, redditAccessToken));
+            deals.push(...await reddit.parseSubreddit(reddit.IDs.GAMEDEALS, redditAccessToken));
+            deals.push(...await reddit.parseSubreddit(reddit.IDs.VIDEOGAMEDEALSCANADA, redditAccessToken));
+
+            reddit.revokeRedditAccessToken(redditAccessToken);
+        }
+
+        await database.clean(_dbDeals, deals, updatedDeals);
+        await database.saveDeals(_dbDeals, deals, newDeals, newlyHotDeals, updatedDeals);
+        await notifications.send(newDeals, newlyHotDeals, updatedDeals, _dbAlerts);
     }
-
-    const redditAccessToken = await reddit.getRedditAccessToken();
-    if (redditAccessToken) {
-        deals.push(...await reddit.parseSubreddit(reddit.IDs.BAPCSALESCANADA, redditAccessToken));
-        deals.push(...await reddit.parseSubreddit(reddit.IDs.GAMEDEALS, redditAccessToken));
-        deals.push(...await reddit.parseSubreddit(reddit.IDs.VIDEOGAMEDEALSCANADA, redditAccessToken));
-
-        reddit.revokeRedditAccessToken(redditAccessToken);
-    }
-
-    await database.clean(_dbDeals, deals, updatedDeals);
-    await database.saveDeals(_dbDeals, deals, newDeals, newlyHotDeals, updatedDeals);
-    await notifications.send(newDeals, newlyHotDeals, updatedDeals, _dbAlerts);
 
     functions.logger.log('Scheduled Job Completed');
 
