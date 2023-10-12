@@ -108,7 +108,11 @@ async function sendNewToDiscord(freeDeal) {
     try {
         functions.logger.log('Discord - Sending ' + freeDeal.id);
 
-        const link = freeDeal.link;
+        let link = freeDeal.link;
+        if (freeDeal.source === gog.ID) {
+            link = 'https://www.gog.com/#giveaway';
+        }
+
         const title = buildTitle(freeDeal);
         const channelId = getDiscordChannelId(freeDeal.source);
         const channel = discordClient.channels.cache.get(channelId);

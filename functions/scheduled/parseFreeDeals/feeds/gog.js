@@ -14,27 +14,27 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
     try {
         functions.logger.log('Parsing GOG');
 
-        const response = await fetch(`${process.env.GOG_API_URL}`, {
+        const response = await fetch(`${process.env.GOG_URL}`, {
             method: 'get',
             signal: AbortSignal.timeout(5000),
         });
 
         if (response.ok) {
-            const json = await response.json();
+            const $ = cheerio.load(await response.text());
 
-            json.products.forEach((gameJson) => {
+            const giveawayElement = $('#giveaway');
+            if (giveawayElement.length === 1) {
                 const freeDeal = {};
-
-                const id = gameJson.slug.replace('-', '_');
+                const id = $(giveawayElement).attr('ng-href').replace('/en/game/', '');
                 freeDeal.id = module.exports.ID + '-' + id;
                 freeDeal.source = module.exports.ID;
                 freeDeal.date = new Date();
-                freeDeal.title = gameJson.title;
+                freeDeal.title = $('div[ng-if=!giveaway.wasMarketingConsentGiven] .giveaway-banner__title').text().trim().replace('Claim ', '');
                 freeDeal.type = null;
-                freeDeal.expiry_date = null;
                 freeDeal.link = util.format('https://www.gog.com/en/game/%s', id);
                 freeDeals.push(freeDeal);
-            });
+                console.log(freeDeal);
+            }
 
             await database.save(dbFreeDeals, freeDeals, module.exports.ID);
         } else {
