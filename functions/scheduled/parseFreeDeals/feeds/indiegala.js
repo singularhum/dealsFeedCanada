@@ -26,14 +26,14 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
             feedElements.each((i, feedElement) => {
                 const description = $(feedElement).find('description').text();
 
-                if (description.includes(`${process.env.INDIEGALA_FREEBIES_URL}`)) {
+                if (description.includes(`${process.env.INDIEGALA_FREEBIES_FIND_URL}`)) {
                     const $i = cheerio.load(description);
 
                     const linkElements = $i('a');
                     let freebieLinkElement = null;
 
                     linkElements.each((i, linkElement) => {
-                        if ($i(linkElement).attr('href').includes(`${process.env.INDIEGALA_FREEBIES_URL}`)) {
+                        if ($i(linkElement).attr('href').includes(`${process.env.INDIEGALA_FREEBIES_FIND_URL}`)) {
                             freebieLinkElement = linkElement;
                             return false;
                         }
@@ -41,11 +41,11 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
 
                     if (freebieLinkElement) {
                         const freeDeal = {};
-                        const id = $i(freebieLinkElement).attr('href').replace('https://steamcommunity.com/linkfilter/?url=' + `${process.env.INDIEGALA_FREEBIES_URL}`, '');
+                        const id = $i(freebieLinkElement).attr('href').replace(`${process.env.INDIEGALA_FREEBIES_STEAM_BASEURL}`, '');
                         freeDeal.id = module.exports.ID + '-' + id;
                         freeDeal.source = module.exports.ID;
                         freeDeal.date = new Date();
-                        freeDeal.title = $i($i('.bb_h1')[0]).text().replace('FREEbie', '').trim();
+                        freeDeal.title = $i($i('.bb_h1')[0]).text().replace(/^freebie:*/ig, '').trim();
                         freeDeal.type = null;
                         freeDeal.link = util.format(`${process.env.INDIEGALA_FREEBIES_URL}` + '%s', id);
 
