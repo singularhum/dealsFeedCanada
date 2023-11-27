@@ -11,7 +11,6 @@ const playStore = require('./feeds/play-store');
 const primeGaming = require('./feeds/prime-gaming');
 const rfdFreebies = require('./feeds/rfd-freebies');
 const steam = require('./feeds/steam');
-const ubisoft = require('./feeds/ubisoft');
 const ueMarketplace = require('./feeds/ue-marketplace');
 
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -228,8 +227,6 @@ function getDiscordChannelId(source) {
         channelId = `${process.env.RFD_FREEBIES_DISCORD_CHANNEL}`;
     } else if (source === steam.ID) {
         channelId = `${process.env.STEAM_DISCORD_CHANNEL}`;
-    } else if (source === ubisoft.ID) {
-        channelId = `${process.env.UBISOFT_DISCORD_CHANNEL}`;
     } else if (source === ueMarketplace.ID) {
         channelId = `${process.env.UE_MARKETPLACE_DISCORD_CHANNEL}`;
     } else {

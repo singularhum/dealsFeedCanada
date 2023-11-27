@@ -9,7 +9,6 @@ const playStore = require('./feeds/play-store');
 const primeGaming = require('./feeds/prime-gaming');
 const rfdFreebies = require('./feeds/rfd-freebies');
 const steam = require('./feeds/steam');
-const ubisoft = require('./feeds/ubisoft');
 const ueMarketplace = require('./feeds/ue-marketplace');
 
 let _dbFreeDeals;
@@ -52,7 +51,6 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
         await primeGaming.parse(_dbFreeDeals, freeDeals);
         await indiegala.parse(_dbFreeDeals, freeDeals);
         await rfdFreebies.parse(_dbFreeDeals, freeDeals);
-        await ubisoft.parse(_dbFreeDeals, freeDeals);
 
         await notifications.send(freeDeals, missedFreeDeals);
     }

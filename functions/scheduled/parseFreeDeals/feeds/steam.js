@@ -64,50 +64,29 @@ module.exports.getExpiryDate = async function(freeDeal) {
     if (response.ok) {
         const $ = cheerio.load(await response.text());
         const discountExpiryElement = $('.game_purchase_discount_quantity');
-        const discountExpiryText = $(discountExpiryElement).text();
+        const parentElementId = $(discountExpiryElement).parent().attr('id');
 
-        const dayMonthResult = discountExpiryText.match(/\d{1,2}\s\w{3}/); // dd mmm
-        const dayMonth2Result = discountExpiryText.match(/\w{3}\s\d{1,2}/); // mmm dd
-        const timeResult = discountExpiryText.match(/\d{1,2}:\d{2}/);
-        const amPmResult = discountExpiryText.match(/[ap]m/);
+        if (parentElementId) {
+            // The expiry date is contained in the free promo package so need to retrieve it.
+            const packageIdMatchResult = parentElementId.match(/\d+/);
+            const freePackageId = packageIdMatchResult[0];
+            functions.logger.log('Steam - Getting expiry date for package id: ' + freePackageId);
 
-        if ((dayMonthResult || dayMonth2Result) && timeResult && amPmResult) {
-            // Depending on locale it can be in either format on the page.
-            let dayMonth = null;
-            if (dayMonthResult) {
-                dayMonth = dayMonthResult[0];
-            } else {
-                dayMonth = dayMonth2Result[0];
-            }
-
-            // Need to find better way to determine the expiry for steam. Fetch seems to default to GMT-7 so will need to offset for UTC.
-            expiryDate = new Date(Date.parse(util.format('%s, %s %s %s -07:00', dayMonth, new Date().getFullYear(), timeResult[0], amPmResult[0])));
-        } else {
-            // The date is not shown for whatever reason so use steam API to get the expiry date.
-            const parentElementId = $(discountExpiryElement).parent().attr('id');
-
-            if (parentElementId) {
-                // The expiry date is contained in the free promo package so need to retrieve it.
-                const packageIdMatchResult = parentElementId.match(/\d+/);
-                const freePackageId = packageIdMatchResult[0];
-                functions.logger.log('Steam - Getting expiry date for package id: ' + freePackageId);
-
-                const steamClient = new SteamUser();
-                await new Promise((resolve, reject) => {
-                    steamClient.on('loggedOn', () => {
-                        resolve();
-                    });
-
-                    steamClient.logOn({ anonymous: true });
+            const steamClient = new SteamUser();
+            await new Promise((resolve, reject) => {
+                steamClient.on('loggedOn', () => {
+                    resolve();
                 });
 
-                const productInfo = await steamClient.getProductInfo([], [parseInt(freePackageId)], true);
-                expiryDate = new Date(productInfo.packages[freePackageId].packageinfo.extended.expirytime * 1000);
+                steamClient.logOn({ anonymous: true });
+            });
 
-                steamClient.logOff();
-            } else {
-                functions.logger.error('Getting expiry date failed for ' + freeDeal.id + '. Missing parent ID for package.');
-            }
+            const productInfo = await steamClient.getProductInfo([], [parseInt(freePackageId)], true);
+            expiryDate = new Date(productInfo.packages[freePackageId].packageinfo.extended.expirytime * 1000);
+
+            steamClient.logOff();
+        } else {
+            functions.logger.error('Getting expiry date failed for ' + freeDeal.id + '. Missing parent ID for package.');
         }
     } else {
         functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);

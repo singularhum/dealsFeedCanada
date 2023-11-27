@@ -46,7 +46,6 @@ These are for limited-time free deals that I usually grab from personally. This 
 | [Prime Gaming](https://gaming.amazon.com) | Free games for those with Amazon Prime | 30 mins | Yes | Prime Gaming Search |
 | [RFD Freebies](https://forums.redflagdeals.com/freebies-f12/?sk=tt&rfd_sk=tt&sd=d) | Freebies forum on RFD | 30 mins | No | RFD API |
 | [Steam](https://store.steampowered.com/) | Free to keep Steam games (does not include free-to-play or free weekend games) | 30 mins | Yes | Steam Search |
-| [~~Ubisoft~~](https://store.ubisoft.com) | Currently not available (untested as there hasn't been a free game in awhile) | 30 mins | No | Ubisoft Search |
 | [Unreal Engine Marketplace](https://www.unrealengine.com/marketplace/) | Free monthly assets for the Unreal Engine | 30 mins | Yes | Unreal Marketplace Search |
 
 \* IndieGala blocks IPs from Google Cloud so this currently uses an alternative source which can be quite delayed.
