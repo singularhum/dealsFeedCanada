@@ -32,7 +32,7 @@ module.exports.getRedditAccessToken = async function() {
             const json = await response.json();
             accessToken = json.access_token;
         } else {
-            functions.logger.error('Error retrieving access token for Reddit API failed');
+            functions.logger.error('Error retrieving access token for Reddit API failed', response);
         }
     } catch (e) {
         functions.logger.error('Error retrieving access token for Reddit API failed', e);
@@ -61,7 +61,7 @@ module.exports.revokeRedditAccessToken = async function(accessToken) {
         });
 
         if (!response.ok) {
-            functions.logger.error('Error revoking access token for Reddit API failed');
+            functions.logger.error('Error revoking access token for Reddit API failed', response);
         }
     } catch (e) {
         functions.logger.error('Error revoking access token for Reddit API failed', e);
