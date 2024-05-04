@@ -4,7 +4,6 @@ const notifications = require('./notifications');
 const epic = require('./feeds/epic');
 const fanatical = require('./feeds/fanatical');
 const gog = require('./feeds/gog');
-const indiegala = require('./feeds/indiegala');
 const playStore = require('./feeds/play-store');
 const primeGaming = require('./feeds/prime-gaming');
 const rfdFreebies = require('./feeds/rfd-freebies');
@@ -49,7 +48,6 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
         await ueMarketplace.parse(_dbFreeDeals, freeDeals);
         await playStore.parse(_dbFreeDeals, freeDeals);
         await primeGaming.parse(_dbFreeDeals, freeDeals);
-        await indiegala.parse(_dbFreeDeals, freeDeals);
         await rfdFreebies.parse(_dbFreeDeals, freeDeals);
 
         await notifications.send(freeDeals, missedFreeDeals);

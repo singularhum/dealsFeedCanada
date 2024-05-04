@@ -3,7 +3,6 @@ const functions = require('firebase-functions');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const gog = require('./feeds/gog');
-const indiegala = require('./feeds/indiegala');
 const rfdFreebies = require('./feeds/rfd-freebies');
 const steam = require('./feeds/steam');
 
@@ -92,7 +91,7 @@ module.exports.save = async function(dbFreeDeals, freeDeals, source) {
                     await db.collection(DB_COLLECTION).doc(dbFreeDeal.id).delete();
                     dbFreeDeals.splice(i, 1);
 
-                    if (source === rfdFreebies.ID || source === indiegala.ID) {
+                    if (source === rfdFreebies.ID) {
                         functions.logger.info('Free deal ' + dbFreeDeal.id + ' removed from DB');
                     } else {
                         // Set as expired and add to array to send udpate notifications.

@@ -6,7 +6,6 @@ const database = require('./database');
 const epic = require('./feeds/epic');
 const fanatical = require('./feeds/fanatical');
 const gog = require('./feeds/gog.js');
-const indiegala = require('./feeds/indiegala');
 const playStore = require('./feeds/play-store');
 const primeGaming = require('./feeds/prime-gaming');
 const rfdFreebies = require('./feeds/rfd-freebies');
@@ -217,8 +216,6 @@ function getDiscordChannelId(source) {
         channelId = `${process.env.FANATICAL_DISCORD_CHANNEL}`;
     } else if (source === gog.ID) {
         channelId = `${process.env.GOG_DISCORD_CHANNEL}`;
-    } else if (source === indiegala.ID) {
-        channelId = `${process.env.INDIEGALA_DISCORD_CHANNEL}`;
     } else if (source === playStore.ID) {
         channelId = `${process.env.PLAY_STORE_DISCORD_CHANNEL}`;
     } else if (source === primeGaming.ID) {
