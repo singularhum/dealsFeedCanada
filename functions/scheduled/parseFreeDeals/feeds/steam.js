@@ -27,12 +27,12 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
                 const freeDeal = {};
                 const logoParts = gameJson.logo.split('/');
 
-                const id = logoParts[5];
+                const id = logoParts[6];
                 freeDeal.id = module.exports.ID + '-' + id;
                 freeDeal.source = module.exports.ID;
                 freeDeal.date = new Date();
                 freeDeal.title = gameJson.name;
-                freeDeal.type = logoParts[4].slice(0, -1); // type is plural in the logo url so remove it
+                freeDeal.type = logoParts[5].slice(0, -1); // type is plural in the logo url so remove it
                 freeDeal.link = util.format('https://store.steampowered.com/%s/%s/', freeDeal.type, id);
 
                 freeDeals.push(freeDeal);
