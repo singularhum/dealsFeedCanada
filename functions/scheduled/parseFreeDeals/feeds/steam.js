@@ -25,17 +25,20 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
 
             json.items.forEach((gameJson) => {
                 const freeDeal = {};
-                const logoParts = gameJson.logo.split('/');
+                const match = gameJson.logo.match(new RegExp(/\/steam\/\w+\/\d+\//));
 
-                const id = logoParts[6];
-                freeDeal.id = module.exports.ID + '-' + id;
-                freeDeal.source = module.exports.ID;
-                freeDeal.date = new Date();
-                freeDeal.title = gameJson.name;
-                freeDeal.type = logoParts[5].slice(0, -1); // type is plural in the logo url so remove it
-                freeDeal.link = util.format('https://store.steampowered.com/%s/%s/', freeDeal.type, id);
+                if (match) {
+                    const logoParts = match[0].split('/');
+                    const id = logoParts[3];
+                    freeDeal.id = module.exports.ID + '-' + id;
+                    freeDeal.source = module.exports.ID;
+                    freeDeal.date = new Date();
+                    freeDeal.title = gameJson.name;
+                    freeDeal.type = logoParts[2].slice(0, -1); // type is plural in the logo url so remove it
+                    freeDeal.link = util.format('https://store.steampowered.com/%s/%s/', freeDeal.type, id);
 
-                freeDeals.push(freeDeal);
+                    freeDeals.push(freeDeal);
+                }
             });
 
             await database.save(dbFreeDeals, freeDeals, module.exports.ID);
