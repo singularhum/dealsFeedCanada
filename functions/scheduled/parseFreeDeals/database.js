@@ -54,7 +54,7 @@ module.exports.setFreeDeal = async function(id, obj, merge) {
  */
 module.exports.save = async function(dbFreeDeals, freeDeals, source) {
     // Checking for new deals.
-    for (const freeDeal of freeDeals) {
+    for (let freeDeal of freeDeals) {
         try {
             if (freeDeal.source === source) {
                 const dbfreeDeal = dbFreeDeals.find((dbfreeDeal) => dbfreeDeal.id === freeDeal.id);
@@ -62,11 +62,7 @@ module.exports.save = async function(dbFreeDeals, freeDeals, source) {
                 if (!dbfreeDeal) {
                     functions.logger.log('New free deal: ' + freeDeal.id);
 
-                    const expiryDate = await getExpiryDate(freeDeal);
-                    if (expiryDate) {
-                        freeDeal.expiry_date = expiryDate;
-                    }
-
+                    freeDeal = await getAdditionalInfo(freeDeal);
                     dbFreeDeals.push(freeDeal);
 
                     // Save to DB and set as isNew for notifications.
@@ -108,22 +104,20 @@ module.exports.save = async function(dbFreeDeals, freeDeals, source) {
 };
 
 /**
- * Get expiry dates for sources where the original API/search does not include them.
- * @param {Object} freeDeal The free deal to get the expiry from.
- * @return {Date} The expiry date.
+ * Get additional info for sources where the original API/search does not include them.
+ * @param {Object} freeDeal The free deal.
+ * @return {Object} The udpated free deal.
  */
-async function getExpiryDate(freeDeal) {
-    let expiryDate = null;
-
+async function getAdditionalInfo(freeDeal) {
     try {
         if (freeDeal.source === steam.ID) {
-            expiryDate = steam.getExpiryDate(freeDeal);
+            freeDeal = steam.getAdditionalInfo(freeDeal);
         } else if (freeDeal.source === gog.ID) {
-            expiryDate = gog.getExpiryDate(freeDeal);
+            freeDeal = gog.getAdditionalInfo(freeDeal);
         }
     } catch (e) {
         functions.logger.error('Getting expiry date failed for ' + freeDeal.id, e);
     }
 
-    return expiryDate;
+    return freeDeal;
 }

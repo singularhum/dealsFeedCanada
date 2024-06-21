@@ -51,49 +51,52 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
 };
 
 /**
- * Get expiry date of the deal.
- * @param {Object} freeDeal The free deal to get the expiry from.
- * @return {Date} The expiry date.
+ * Get additional info for the deal.
+ * @param {Object} freeDeal The free deal.
+ * @return {Object} The updated free deal.
  */
-module.exports.getExpiryDate = async function(freeDeal) {
-    let expiryDate = null;
+module.exports.getAdditionalInfo = async function(freeDeal) {
+    try {
+        const response = await fetch(freeDeal.link, {
+            method: 'get',
+            headers: { 'Cookie': 'wants_mature_content=1; birthtime=0; lastagecheckage=1-0-1900;' },
+            signal: AbortSignal.timeout(5000),
+        });
 
-    const response = await fetch(freeDeal.link, {
-        method: 'get',
-        headers: { 'Cookie': 'wants_mature_content=1; birthtime=0; lastagecheckage=1-0-1900;' },
-        signal: AbortSignal.timeout(5000),
-    });
+        if (response.ok) {
+            const $ = cheerio.load(await response.text());
+            const discountExpiryElement = $('.game_purchase_discount_quantity');
+            const parentElementId = $(discountExpiryElement).parent().attr('id');
 
-    if (response.ok) {
-        const $ = cheerio.load(await response.text());
-        const discountExpiryElement = $('.game_purchase_discount_quantity');
-        const parentElementId = $(discountExpiryElement).parent().attr('id');
+            if (parentElementId) {
+                // The expiry date is contained in the free promo package so need to retrieve it.
+                const packageIdMatchResult = parentElementId.match(/\d+/);
+                const freePackageId = packageIdMatchResult[0];
+                functions.logger.log('Steam - Getting expiry date for package id: ' + freePackageId);
 
-        if (parentElementId) {
-            // The expiry date is contained in the free promo package so need to retrieve it.
-            const packageIdMatchResult = parentElementId.match(/\d+/);
-            const freePackageId = packageIdMatchResult[0];
-            functions.logger.log('Steam - Getting expiry date for package id: ' + freePackageId);
+                const steamClient = new SteamUser();
+                await new Promise((resolve, reject) => {
+                    steamClient.on('loggedOn', () => {
+                        resolve();
+                    });
 
-            const steamClient = new SteamUser();
-            await new Promise((resolve, reject) => {
-                steamClient.on('loggedOn', () => {
-                    resolve();
+                    steamClient.logOn({ anonymous: true });
                 });
 
-                steamClient.logOn({ anonymous: true });
-            });
+                const productInfo = await steamClient.getProductInfo([], [parseInt(freePackageId)], true);
+                const expiryDate = new Date(productInfo.packages[freePackageId].packageinfo.extended.expirytime * 1000);
+                freeDeal.expiry_date = expiryDate;
 
-            const productInfo = await steamClient.getProductInfo([], [parseInt(freePackageId)], true);
-            expiryDate = new Date(productInfo.packages[freePackageId].packageinfo.extended.expirytime * 1000);
-
-            steamClient.logOff();
+                steamClient.logOff();
+            } else {
+                functions.logger.error('Getting expiry date failed for ' + freeDeal.id + '. Missing parent ID for package.');
+            }
         } else {
-            functions.logger.error('Getting expiry date failed for ' + freeDeal.id + '. Missing parent ID for package.');
+            functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);
         }
-    } else {
-        functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);
+    } catch (e) {
+        functions.logger.error('Parsing Steam additional info failed', e);
     }
 
-    return expiryDate;
+    return freeDeal;
 };

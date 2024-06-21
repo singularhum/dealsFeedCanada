@@ -1,7 +1,6 @@
 const functions = require('firebase-functions');
 const cheerio = require('cheerio');
 const database = require('../database');
-const util = require('util');
 
 module.exports.ID = 'GOG';
 
@@ -22,16 +21,17 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
         if (response.ok) {
             const $ = cheerio.load(await response.text());
 
-            const giveawayElement = $('#giveaway');
+            const giveawayElement = $('.giveaway__overlay-link');
             if (giveawayElement.length === 1) {
                 const freeDeal = {};
-                const id = $(giveawayElement).attr('ng-href').replace('/en/game/', '');
+                const link = $(giveawayElement).attr('href');
+                const id = link.replace('https://www.gog.com/en/game/', '');
                 freeDeal.id = module.exports.ID + '-' + id;
                 freeDeal.source = module.exports.ID;
                 freeDeal.date = new Date();
-                freeDeal.title = $('div[ng-if=!giveaway.wasMarketingConsentGiven] .giveaway-banner__title').text().trim().replace('Claim ', '');
                 freeDeal.type = null;
-                freeDeal.link = util.format('https://www.gog.com/en/game/%s', id);
+                freeDeal.link = link;
+
                 freeDeals.push(freeDeal);
                 console.log(freeDeal);
             }
@@ -46,33 +46,53 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
 };
 
 /**
- * Get expiry date of the deal.
- * @param {Object} freeDeal The free deal to get the expiry from.
- * @return {Date} The expiry date.
+ * Gets the title and expiry date of the deal.
+ * @param {Object} freeDeal The free deal.
+ * @return {Object} The updated free deal.
  */
-module.exports.getExpiryDate = async function(freeDeal) {
-    let expiryDate = null;
+module.exports.getAdditionalInfo = async function(freeDeal) {
+    try {
+        const response = await fetch(freeDeal.link, {
+            method: 'get',
+            signal: AbortSignal.timeout(5000),
+        });
 
-    const response = await fetch(`${process.env.GOG_URL}`, {
-        method: 'get',
-        signal: AbortSignal.timeout(5000),
-    });
+        if (response.ok) {
+            const $ = cheerio.load(await response.text());
 
-    if (response.ok) {
-        const $ = cheerio.load(await response.text());
-
-        const giveawayElement = $('#giveaway');
-        if (giveawayElement.length === 1) {
-            expiryDate = new Date(parseInt($('.giveaway-banner__countdown-timer').attr('end-date')));
-        } else {
-            const countdownTimer = $('a[href=/en/game/' + freeDeal.id + '].big-spot gog-countdown-timer');
-            if (countdownTimer.length === 1) {
-                expiryDate = new Date($(countdownTimer).attr('end-date'));
+            const titleElment = $('.productcard-basics__title');
+            if (titleElment.length === 1) {
+                freeDeal.title = titleElment.text().trim();
+            } else {
+                functions.logger.error('Getting title failed for ' + freeDeal.id, response);
             }
+
+            const endDateElement = $('.product-actions__time');
+            if (endDateElement.length >= 1) {
+                const endDateText = endDateElement.first().text().trim();
+                const regexp = /(\d{2})\/(\d{2})\/(\d{4}) (\d{1,}:\d{1,})/g;
+                const matches = [...endDateText.matchAll(regexp)];
+                let endDate = null;
+
+                if (matches.length === 1) {
+                    const match = matches[0];
+                    if (match.length > 0) {
+                        // 24/06/2024 15:59 = ["24/06/2024 15:59", "24", "06", "2024", "15:59"]
+                        endDate = new Date(match[3] + '-' + match[2] + '-' + match[1] + 'T' + match[4] + 'Z');
+                        endDate.setHours(endDate.getHours() - 3);
+                    }
+                }
+
+                freeDeal.expiry_date = endDate;
+            } else {
+                functions.logger.error('Getting expiry date failed for ' + freeDeal.id);
+            }
+        } else {
+            functions.logger.error('Getting title and expiry date failed for ' + freeDeal.id, response);
         }
-    } else {
-        functions.logger.error('Getting expiry date failed for ' + freeDeal.id, response);
+    } catch (e) {
+        functions.logger.error('Parsing GOG additional info failed', e);
     }
 
-    return expiryDate;
+    return freeDeal;
 };
