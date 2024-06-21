@@ -14,14 +14,14 @@
   },
   "main": "index.js",
   "dependencies": {
-    "discord.js": "^14.14.1",
-    "firebase-admin": "^12.1.0",
+    "discord.js": "^14.15.3",
+    "firebase-admin": "^12.2.0",
     "firebase-functions": "^4.9.0"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
     "eslint-config-google": "^0.14.0",
-    "firebase-functions-test": "^3.2.0"
+    "firebase-functions-test": "^3.3.0"
   },
   "private": true
 }
