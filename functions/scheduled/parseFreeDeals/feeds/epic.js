@@ -26,7 +26,9 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
                     const freeDeal = {};
 
                     let id;
-                    if (gameJson.catalogNs.mappings && gameJson.catalogNs.mappings.length > 0) {
+                    if (gameJson.offerMappings && gameJson.offerMappings.length > 0) {
+                        id = gameJson.offerMappings[0].pageSlug;
+                    } else if (gameJson.catalogNs.mappings && gameJson.catalogNs.mappings.length > 0) {
                         id = gameJson.catalogNs.mappings[0].pageSlug;
                     } else {
                         id = gameJson.productSlug;
