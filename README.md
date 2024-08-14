@@ -33,9 +33,9 @@ Only about the latest 25-30 deals (first page) are tracked for each feed for occ
 
 ![Screenshot of the main Discord channels](https://i.imgur.com/zOekzH5.png)
 
-### Free Deals (Beta)
+### Free Deals
 
-These are for limited-time free deals that I usually grab from personally. This is in beta so there still may be issues and missing features for some sources.
+These are for limited-time free deals that I usually grab from personally.
 
 | Name | Description | Refresh Rate | Expiry Date | Source |
 | --- | --- | --- | --- | --- |
@@ -63,7 +63,7 @@ Only about the latest 25-30 deals (first page) are tracked for each feed for occ
 | [Slickdeals Rising](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | A hot deals forum for the US. Since many deals are posted, this feed will only post deals that have reached a minimum of 5 upvotes. | 5 mins | Slickdeals RSS |
 | [Slickdeals Hot](https://slickdeals.net/forums/forumdisplay.php?f=9) | US | The same as Slickdeals Rising but will only post deals with a minimum of 15 upvotes. | 5 mins | Slickdeals RSS |
 
-## Alerts (Beta)
+## Alerts
 
 Alerts will ping you when new deals are posted that contain certain keywords. This feature is useful for those that may only want to be notified for specific deals instead of all deals.
 
