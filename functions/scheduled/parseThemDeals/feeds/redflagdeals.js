@@ -16,7 +16,7 @@ module.exports.parse = async function() {
         const sixHoursAgo = helpers.getHoursAgo(6);
 
         // Use forum 9 (hot deals) with the date sorted descending. 30 per page is the max (sometimes less with stickied sponsored posts).
-        const response = await fetch(`${process.env.RFD_API_URL}`, {
+        const response = await fetch(`${process.env.RFD_API_URL}&time=${new Date().getTime()}`, {
             method: 'get',
             headers: { 'Content-Type': 'application/json' },
             signal: AbortSignal.timeout(5000),
