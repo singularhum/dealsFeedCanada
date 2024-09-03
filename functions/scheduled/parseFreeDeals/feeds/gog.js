@@ -33,7 +33,6 @@ module.exports.parse = async function(dbFreeDeals, freeDeals) {
                 freeDeal.link = link;
 
                 freeDeals.push(freeDeal);
-                console.log(freeDeal);
             }
 
             await database.save(dbFreeDeals, freeDeals, module.exports.ID);
@@ -77,8 +76,8 @@ module.exports.getAdditionalInfo = async function(freeDeal) {
                 if (matches.length === 1) {
                     const match = matches[0];
                     if (match.length > 0) {
-                        // 24/06/2024 15:59 = ["24/06/2024 15:59", "24", "06", "2024", "15:59"]
-                        endDate = new Date(match[3] + '-' + match[2] + '-' + match[1] + 'T' + match[4] + 'Z');
+                        // 06/24/2024 15:59 = ["06/24/2024 15:59", "06", "24", "2024", "15:59"]
+                        endDate = new Date(match[3] + '-' + match[1] + '-' + match[2] + 'T' + match[4] + ':00.000Z');
                         endDate.setHours(endDate.getHours() - 3);
                     }
                 }
