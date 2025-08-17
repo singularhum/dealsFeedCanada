@@ -8,8 +8,7 @@ const cheerio = require('cheerio');
  * @param {cheerio.CheerioAPI} $ Cheerio object.
  */
 module.exports.parse = function(feed, article, feedElement, $) {
-    const mainMatch = article.id.match(/https:\/\/slickdeals.net\/f\/\d+/);
-    const idMatch = mainMatch[0].match(/\d{8,}/);
+    const idMatch = article.id.match(/\d{8,}/);
     article.id = feed.id + '-' + idMatch[0];
 
     const content = $(feedElement).find('content\\:encoded').text();
