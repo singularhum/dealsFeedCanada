@@ -50,13 +50,10 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
             deals.push(...await redflagdeals.parse());
         }
 
-        const redditAccessToken = await reddit.getRedditAccessToken();
-        if (redditAccessToken) {
-            deals.push(...await reddit.parseSubreddit(reddit.IDs.BAPCSALESCANADA, redditAccessToken));
-            deals.push(...await reddit.parseSubreddit(reddit.IDs.GAMEDEALS, redditAccessToken));
-            deals.push(...await reddit.parseSubreddit(reddit.IDs.VIDEOGAMEDEALSCANADA, redditAccessToken));
-
-            reddit.revokeRedditAccessToken(redditAccessToken);
+        if ((new Date).getMinutes() % 2 === 0) {
+            deals.push(...await reddit.parseSubreddit(reddit.IDs.BAPCSALESCANADA));
+            deals.push(...await reddit.parseSubreddit(reddit.IDs.GAMEDEALS));
+            deals.push(...await reddit.parseSubreddit(reddit.IDs.VIDEOGAMEDEALSCANADA));
         }
 
         await database.clean(_dbDeals, deals, updatedDeals);

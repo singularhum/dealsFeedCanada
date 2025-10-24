@@ -73,10 +73,9 @@ module.exports.revokeRedditAccessToken = async function(accessToken) {
 /**
  * Parse supplied subreddit.
  * @param {string} subredditName The name of the subreddit to parse.
- * @param {string} accessToken The access token to use the Reddit API.
  * @return {Array} An array of the deals parsed.
  */
-module.exports.parseSubreddit = async function(subredditName, accessToken) {
+module.exports.parseSubreddit = async function(subredditName) {
     functions.logger.log('Parsing ' + subredditName);
     const deals = [];
 
@@ -86,10 +85,6 @@ module.exports.parseSubreddit = async function(subredditName, accessToken) {
         // Uses .json in the path to return json and is sorted by new.
         const response = await fetch(util.format(`${process.env.SUBREDDIT_API_URL}`, subredditName), {
             method: 'get',
-            headers: {
-                'User-Agent': `${process.env.REDDIT_USER_AGENT}`,
-                'Authorization': 'Bearer ' + accessToken,
-            },
             signal: AbortSignal.timeout(5000),
         });
 
