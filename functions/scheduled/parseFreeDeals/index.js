@@ -1,14 +1,14 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const database = require('./database');
 const notifications = require('./notifications');
 const epic = require('./feeds/epic');
 const fanatical = require('./feeds/fanatical');
 const gog = require('./feeds/gog');
 const playStore = require('./feeds/play-store');
-const primeGaming = require('./feeds/prime-gaming');
 const rfdFreebies = require('./feeds/rfd-freebies');
 const steam = require('./feeds/steam');
-const ueMarketplace = require('./feeds/ue-marketplace');
+// const primeGaming = require('./feeds/prime-gaming');
+// const ueMarketplace = require('./feeds/ue-marketplace');
 
 let _dbFreeDeals;
 
@@ -45,10 +45,11 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
             await fanatical.parse(_dbFreeDeals, freeDeals);
         }
         await epic.parse(_dbFreeDeals, freeDeals);
-        await ueMarketplace.parse(_dbFreeDeals, freeDeals);
         await playStore.parse(_dbFreeDeals, freeDeals);
-        await primeGaming.parse(_dbFreeDeals, freeDeals);
         await rfdFreebies.parse(_dbFreeDeals, freeDeals);
+
+        // await ueMarketplace.parse(_dbFreeDeals, freeDeals);
+        // await primeGaming.parse(_dbFreeDeals, freeDeals);
 
         await notifications.send(freeDeals, missedFreeDeals);
     }

@@ -1,7 +1,7 @@
 const DB_DEALS_COLLECTION = 'deals';
 const DB_ALERTS_COLLECTION = 'alerts';
 const DB_ALERTS_REFRESH_COLLECTION = 'alerts-refresh';
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const constants = require('./constants');

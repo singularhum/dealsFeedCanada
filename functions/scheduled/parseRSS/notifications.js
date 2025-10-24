@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const { setTimeout } = require('timers/promises');
 const { Client, Events, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 const database = require('./database');
@@ -32,7 +32,7 @@ module.exports.login = async function() {
             discordClient.login(`${process.env.DISCORD_BOT_TOKEN}`);
         });
 
-        const promiseTimeout = new Promise((resolve, reject) => setTimeout(() => reject(new Error('Discord - Logging in timed out.')), 10000));
+        const promiseTimeout = new Promise((resolve, reject) => setTimeout(10000, () => reject(new Error('Discord - Logging in timed out.'))));
         await Promise.race([promiseTimeout, promiseDiscordLogin]);
     }
 

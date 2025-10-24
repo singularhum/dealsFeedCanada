@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const cheerio = require('cheerio');
 const database = require('../database');
 

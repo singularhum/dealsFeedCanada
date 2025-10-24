@@ -1,5 +1,5 @@
 const DB_COLLECTION = 'free-deals';
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 const gog = require('./feeds/gog');

@@ -1,4 +1,4 @@
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const database = require('./database');
 const defaultParser = require('./parsers/default');
 const notifications = require('./notifications');

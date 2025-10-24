@@ -1,6 +1,6 @@
 const RSS_ARTICLES_DB_COLLECTION = 'rss-articles';
 const RSS_FEEDS_DB_COLLECTION = 'rss-feeds';
-const functions = require('firebase-functions');
+const functions = require('firebase-functions/v1');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore } = require('firebase-admin/firestore');
 
