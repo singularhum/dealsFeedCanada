@@ -10,7 +10,6 @@ const playStore = require('./feeds/play-store');
 const primeGaming = require('./feeds/prime-gaming');
 const rfdFreebies = require('./feeds/rfd-freebies');
 const steam = require('./feeds/steam');
-const ueMarketplace = require('./feeds/ue-marketplace');
 
 const discordClient = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -224,8 +223,6 @@ function getDiscordChannelId(source) {
         channelId = `${process.env.RFD_FREEBIES_DISCORD_CHANNEL}`;
     } else if (source === steam.ID) {
         channelId = `${process.env.STEAM_DISCORD_CHANNEL}`;
-    } else if (source === ueMarketplace.ID) {
-        channelId = `${process.env.UE_MARKETPLACE_DISCORD_CHANNEL}`;
     } else {
         throw new Error('Source of "' + source + '" is unhandled');
     }

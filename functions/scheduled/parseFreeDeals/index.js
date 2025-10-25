@@ -8,7 +8,6 @@ const playStore = require('./feeds/play-store');
 const rfdFreebies = require('./feeds/rfd-freebies');
 const steam = require('./feeds/steam');
 const primeGaming = require('./feeds/prime-gaming');
-// const ueMarketplace = require('./feeds/ue-marketplace');
 
 let _dbFreeDeals;
 
@@ -48,8 +47,6 @@ exports.parseFreeDeals = functions.runWith({ maxInstances: 1, timeoutSeconds: 60
         await playStore.parse(_dbFreeDeals, freeDeals);
         await rfdFreebies.parse(_dbFreeDeals, freeDeals);
         await primeGaming.parse(_dbFreeDeals, freeDeals);
-
-        // await ueMarketplace.parse(_dbFreeDeals, freeDeals);
 
         await notifications.send(freeDeals, missedFreeDeals);
     }
