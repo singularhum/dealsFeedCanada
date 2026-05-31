@@ -50,12 +50,10 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
             deals.push(...await redflagdeals.parse());
         }
 
-        // Only do reddit on every 10 minutes in the hour.
-        if ((new Date).getMinutes() % 10 === 0) {
-            const redditAccessToken = await reddit.getRedditAccessToken();
-            deals.push(...await reddit.parseSubreddit(reddit.IDs.BAPCSALESCANADA, redditAccessToken));
-            deals.push(...await reddit.parseSubreddit(reddit.IDs.GAMEDEALS, redditAccessToken));
-            deals.push(...await reddit.parseSubreddit(reddit.IDs.VIDEOGAMEDEALSCANADA, redditAccessToken));
+        if ((new Date).getMinutes() % 4 === 0) {
+            deals.push(...await reddit.parseSubredditRss(reddit.IDs.BAPCSALESCANADA));
+            deals.push(...await reddit.parseSubredditRss(reddit.IDs.GAMEDEALS));
+            deals.push(...await reddit.parseSubredditRss(reddit.IDs.VIDEOGAMEDEALSCANADA));
         }
 
         await database.clean(_dbDeals, deals, updatedDeals);

@@ -238,7 +238,7 @@ function shouldUpdateDeal(dbDeal, deal) {
         shouldUpdate = true;
         functions.logger.log('Previous deal update to title/tag: ' + dbDeal.id);
     } else {
-        if (deal.score !== dbDeal.score) {
+        if (deal.score !== null && deal.score !== dbDeal.score) {
             if (deal.source === redflagdeals.ID && (deal.tag === constants.EXPIRED_STATE || deal.tag === constants.MOVED_STATE)) {
                 // When RFD deal is expired/moved, the score is returned as 0 so ignore that.
                 shouldUpdate = false;
@@ -248,7 +248,7 @@ function shouldUpdateDeal(dbDeal, deal) {
             }
         }
 
-        if (!shouldUpdate && deal.num_comments !== dbDeal.num_comments) {
+        if (!shouldUpdate && deal.num_comments !== null && deal.num_comments !== dbDeal.num_comments) {
             const difference = Math.abs(dbDeal.num_comments - deal.num_comments);
             shouldUpdate = shouldUpdateScoreComment(difference, deal.num_comments);
         }

@@ -1,6 +1,7 @@
 const functions = require('firebase-functions/v1');
 const helpers = require('./../helpers');
 const util = require('util');
+const cheerio = require('cheerio');
 
 module.exports.IDs = Object.freeze({
     BAPCSALESCANADA: 'bapcsalescanada',
@@ -133,6 +134,52 @@ module.exports.parseSubreddit = async function(subredditName, accessToken) {
                     deals.push(deal);
                 }
             });
+        } else {
+            functions.logger.error('Parsing Subreddit ' + subredditName + ' failed', response);
+        }
+    } catch (e) {
+        functions.logger.error('Parsing Subreddit ' + subredditName + ' failed', e);
+    }
+
+    return deals;
+};
+
+/**
+ * Parse supplied subreddit.
+ * @param {string} subredditName The name of the subreddit to parse.
+ * @return {Array} An array of the deals parsed.
+ */
+module.exports.parseSubredditRss = async function(subredditName) {
+    functions.logger.log('Parsing ' + subredditName);
+    const deals = [];
+
+    try {
+        const response = await fetch(util.format(`${process.env.SUBREDDIT_RSS_URL}`, subredditName), {
+            method: 'get',
+            signal: AbortSignal.timeout(5000),
+        });
+
+        if (response.ok) {
+            const $ = cheerio.load(await response.text(), {
+                xmlMode: true,
+            });
+
+            const entries = $('entry');
+            if (entries.length > 0) {
+                entries.each((i, entry) => {
+                    const deal = {};
+                    deal.id = $(entry).find('id').text().replace('t3_', '');
+                    deal.source = subredditName;
+                    deal.title = $(entry).find('title').text();
+                    deal.score = null;
+                    deal.num_comments = null;
+                    deal.is_hot = false;
+                    deal.tag = null;
+                    deal.created = new Date($(entry).find('published').text());
+
+                    deals.push(deal);
+                });
+            }
         } else {
             functions.logger.error('Parsing Subreddit ' + subredditName + ' failed', response);
         }

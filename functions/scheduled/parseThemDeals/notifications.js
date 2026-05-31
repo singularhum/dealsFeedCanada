@@ -155,15 +155,17 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
         }
 
         let score = deal.score;
-        if (score >= 0) {
+        if (score !== null && score >= 0) {
             score = '+' + score;
         }
 
         let numComments = deal.num_comments;
-        if (numComments === 1) {
-            numComments = numComments + ' comment';
-        } else {
-            numComments = numComments + ' comments';
+        if (numComments !== null) {
+            if (numComments === 1) {
+                numComments = numComments + ' comment';
+            } else {
+                numComments = numComments + ' comments';
+            }
         }
 
         let tag = deal.tag;
@@ -177,8 +179,11 @@ async function sendDiscordApi(deal, allChannelId, hotChannelId, isNew, sendToHot
         const embed = new EmbedBuilder()
             .setTitle(title)
             .setURL(link)
-            .setFooter({ text: util.format('%s score  ·  %s%s', score, numComments, tag) })
             .setColor(2829617);
+
+        if (score !== null && numComments !== null) {
+            embed.setFooter({ text: util.format('%s score  ·  %s%s', score, numComments, tag) });
+        }
 
         const allChannel = discordClient.channels.cache.get(allChannelId);
         const hotChannel = discordClient.channels.cache.get(hotChannelId);
