@@ -8,7 +8,7 @@ This was created for my own personal use and preferences but you can [join the s
 
 ## Features
 
-- Posts new deals that are detected every 1-2 mins for Reddit sources, 5 mins for RFD and 30 mins for free deals
+- Posts new deals that are detected every 6 mins for Reddit sources, 5 mins for RFD and 30 mins for free deals
 - Use Discord notifications to get notified of new deals and/or use the server as a consolidated feeds reader
 - Subscribe to alerts when deals contain certain keywords (ex. Price Error) and/or request your own
 - Displays and occasionally updates the score/upvotes, number of comments and flair/status of each deal when available
@@ -26,10 +26,14 @@ Only about the latest 25-30 deals (first page) are tracked for each feed for occ
 
 | Name | Description | Refresh Rate | Hot Deals | Source |
 | --- | --- | --- | --- | --- |
-| [/r/bapcsalescanada](https://www.reddit.com/r/bapcsalescanada/new/) | PC-related sales in Canada | 1-2 mins | 20+ in 6 hrs | Reddit API |
-| [/r/GameDeals](https://www.reddit.com/r/GameDeals/new/) | Deals for games, many which can be bought in CAD | 1-2 mins | 100+ in 6 hrs | Reddit API |
+| [/r/bapcsalescanada](https://www.reddit.com/r/bapcsalescanada/new/) | PC-related sales in Canada | 6 mins | ~~20+ in 6 hrs~~ | Reddit RSS |
+| [/r/GameDeals](https://www.reddit.com/r/GameDeals/new/) | Deals for games, many which can be bought in CAD | 6 mins | ~~100+ in 6 hrs~~ | Reddit RSS |
 | [RedFlagDeals Hot Deals](https://forums.redflagdeals.com/hot-deals-f9/?rfd_sk=tt) | A popular deals forum in Canada | 5 mins | 20+ in 6 hrs | RFD API |
-| [/r/VideoGameDealsCanada](https://www.reddit.com/r/VideoGameDealsCanada/new/) | Canadian specific deals for Video Games | 1-2 mins | 20+ in 6 hrs | Reddit API |
+| [/r/VideoGameDealsCanada](https://www.reddit.com/r/VideoGameDealsCanada/new/) | Canadian specific deals for Video Games | 6 mins | ~~20+ in 6 hrs~~ | Reddit RSS |
+
+**May 28, 2026**: Reddit has blocked JSON API access. A switch was made to use the Reddit RSS feed. However, these deals will no longer be posted to the Hot Deals channels since the upvotes are not included by Reddit in the RSS feeds.
+
+**June 11, 2026**: Reddit has changed the rate limits for the RSS feeds to 1 read every 60 seconds globally for all feeds. The refresh rate will be every 6 minutes staggered.
 
 ![Screenshot of the main Discord channels](https://i.imgur.com/zOekzH5.png)
 
