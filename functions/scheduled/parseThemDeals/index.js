@@ -53,11 +53,11 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
         }
 
         // Reddit rss feeds are rate limited to 1 every 60 seconds so need to stagger them.
-        if (currentMinutes % 4 === 0) {
+        if (currentMinutes % 6 === 1) {
             deals.push(...await reddit.parseSubredditRss(reddit.IDs.BAPCSALESCANADA));
-        } else if (currentMinutes % 6 === 0) {
+        } else if (currentMinutes % 6 === 3) {
             deals.push(...await reddit.parseSubredditRss(reddit.IDs.VIDEOGAMEDEALSCANADA));
-        } else if (currentMinutes % 8 === 0) {
+        } else if (currentMinutes % 6 === 5) {
             deals.push(...await reddit.parseSubredditRss(reddit.IDs.GAMEDEALS));
         }
 
