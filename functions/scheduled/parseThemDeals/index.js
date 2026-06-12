@@ -44,16 +44,21 @@ exports.parseThemDeals = functions.runWith(scheduledRuntimeOptions).pubsub.sched
             }
         }
 
+        const currentMinutes = (new Date).getMinutes();
+
         // Only do RFD on every 5 minutes in the hour.
-        if ((new Date).getMinutes() % 5 === 0) {
+        if (currentMinutes % 5 === 0) {
             helpers.logIP();
             deals.push(...await redflagdeals.parse());
         }
 
-        if ((new Date).getMinutes() % 4 === 0) {
+        // Reddit rss feeds are rate limited to 1 every 60 seconds so need to stagger them.
+        if (currentMinutes % 4 === 0) {
             deals.push(...await reddit.parseSubredditRss(reddit.IDs.BAPCSALESCANADA));
-            deals.push(...await reddit.parseSubredditRss(reddit.IDs.GAMEDEALS));
+        } else if (currentMinutes % 6 === 0) {
             deals.push(...await reddit.parseSubredditRss(reddit.IDs.VIDEOGAMEDEALSCANADA));
+        } else if (currentMinutes % 8 === 0) {
+            deals.push(...await reddit.parseSubredditRss(reddit.IDs.GAMEDEALS));
         }
 
         await database.clean(_dbDeals, deals, updatedDeals);
