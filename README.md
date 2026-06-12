@@ -33,7 +33,7 @@ Only about the latest 25-30 deals (first page) are tracked for each feed for occ
 
 **May 28, 2026**: Reddit has blocked JSON API access. A switch was made to use the Reddit RSS feed. However, these deals will no longer be posted to the Hot Deals channels since the upvotes are not included by Reddit in the RSS feeds.
 
-**June 11, 2026**: Reddit has changed the rate limits for the RSS feeds to 1 read every 60 seconds globally for all feeds. The refresh rate will be every 6 minutes staggered.
+**June 11, 2026**: Reddit has changed the rate limits for the RSS feeds to 1 feed every 60 seconds. The refresh rate will now be every 6 minutes staggered.
 
 ![Screenshot of the main Discord channels](https://i.imgur.com/zOekzH5.png)
 
